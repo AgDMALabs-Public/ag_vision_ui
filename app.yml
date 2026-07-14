@@ -1,0 +1,1 @@
+command: ["node", ".next/standalone/server.js"]

@@ -1,0 +1,12 @@
+{
+  "name": "@agv_ui/styles",
+  "version": "1.0.0",
+  "description": "Styles for the FA UI project",
+  "private": true,
+  "main": "styles.css",
+  "style": "styles.css",
+  "exports": {
+    ".": "./styles.css",
+    "./*": "./*"
+  }
+}
