@@ -1,19 +1,7 @@
 "use client";
 
-import "leaflet/dist/leaflet.css";
-import "@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css";
-// No static JS import of geoman here — loaded dynamically below
-
-import {useCallback, useEffect, useRef, useState} from "react";
-import L from "leaflet";
-
-// ── Leaflet default icon fix (required in Next.js) ────────────────────────────
-delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl;
-L.Icon.Default.mergeOptions({
-    iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-});
+// No top-level Leaflet import — loaded entirely dynamically to prevent SSR crash
+import { useCallback, useEffect, useRef, useState } from "react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -33,24 +21,55 @@ export interface BoundaryDrawerProps {
 
 // ── Styles ────────────────────────────────────────────────────────────────────
 
-const DEFAULT_STYLE = {color: "#2563eb", weight: 2, fillOpacity: 0.15};
-const SELECTED_STYLE = {color: "#f59e0b", weight: 3, fillOpacity: 0.3};
-const GRID_STYLE = {color: "#22c55e", weight: 1.5, fillOpacity: 0.1};
+const DEFAULT_STYLE = { color: "#2563eb", weight: 2, fillOpacity: 0.15 };
+const SELECTED_STYLE = { color: "#f59e0b", weight: 3, fillOpacity: 0.3 };
+const GRID_STYLE = { color: "#22c55e", weight: 1.5, fillOpacity: 0.1 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function layerToFeature(layer: L.Layer): GeoJSON.Feature | null {
-    if (
-        layer instanceof L.Polygon ||
-        layer instanceof L.Polyline ||
-        layer instanceof L.Rectangle ||
-        layer instanceof L.Circle ||
-        layer instanceof L.CircleMarker ||
-        layer instanceof L.Marker
-    ) {
-        return (layer as unknown as { toGeoJSON(): GeoJSON.Feature }).toGeoJSON();
+function layerToFeature(layer: any): GeoJSON.Feature | null {
+    if (typeof layer.toGeoJSON === "function") {
+        return layer.toGeoJSON() as GeoJSON.Feature;
     }
     return null;
+}
+
+// ── Grid generation helper ────────────────────────────────────────────────────
+
+function generateGridFeatures(
+    bounds: any,
+    rows: number,
+    cols: number,
+): GeoJSON.Feature[] {
+    const south = bounds.getSouth();
+    const north = bounds.getNorth();
+    const west = bounds.getWest();
+    const east = bounds.getEast();
+
+    const latStep = (north - south) / rows;
+    const lngStep = (east - west) / cols;
+
+    const features: GeoJSON.Feature[] = [];
+
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+            const s = south + r * latStep;
+            const n = south + (r + 1) * latStep;
+            const w = west + c * lngStep;
+            const e = west + (c + 1) * lngStep;
+
+            features.push({
+                type: "Feature",
+                properties: { row: r + 1, col: c + 1, plot: r * cols + c + 1 },
+                geometry: {
+                    type: "Polygon",
+                    coordinates: [[[w, s], [e, s], [e, n], [w, n], [w, s]]],
+                },
+            });
+        }
+    }
+
+    return features;
 }
 
 // ── Toolbar button helper ─────────────────────────────────────────────────────
@@ -81,57 +100,20 @@ function ToolbarButton({
     );
 }
 
-// ── Grid generation helper ────────────────────────────────────────────────────
-
-function generateGridFeatures(
-    bounds: L.LatLngBounds,
-    rows: number,
-    cols: number,
-): GeoJSON.Feature[] {
-    const south = bounds.getSouth();
-    const north = bounds.getNorth();
-    const west = bounds.getWest();
-    const east = bounds.getEast();
-
-    const latStep = (north - south) / rows;
-    const lngStep = (east - west) / cols;
-
-    const features: GeoJSON.Feature[] = [];
-
-    for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-            const s = south + r * latStep;
-            const n = south + (r + 1) * latStep;
-            const w = west + c * lngStep;
-            const e = west + (c + 1) * lngStep;
-
-            features.push({
-                type: "Feature",
-                properties: {row: r + 1, col: c + 1, plot: r * cols + c + 1},
-                geometry: {
-                    type: "Polygon",
-                    coordinates: [[[w, s], [e, s], [e, n], [w, n], [w, s]]],
-                },
-            });
-        }
-    }
-
-    return features;
-}
-
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export function BoundaryDrawer({orthoInfoUrl, saveUrl, onSaved, onCancel}: BoundaryDrawerProps) {
+export function BoundaryDrawer({ orthoInfoUrl, saveUrl, onSaved, onCancel }: BoundaryDrawerProps) {
     const [orthoInfo, setOrthoInfo] = useState<OrthoInfo | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const mapContainerRef = useRef<HTMLDivElement>(null);
-    const mapRef = useRef<L.Map | null>(null);
-    const drawnLayersRef = useRef<L.FeatureGroup | null>(null);
+    const mapRef = useRef<any>(null);
+    const drawnLayersRef = useRef<any>(null);
+    const LRef = useRef<any>(null);
 
-    const selectedLayersRef = useRef<Set<L.Layer>>(new Set());
+    const selectedLayersRef = useRef<Set<any>>(new Set());
     const [selectedCount, setSelectedCount] = useState(0);
 
     const isMoveModeRef = useRef(false);
@@ -147,7 +129,7 @@ export function BoundaryDrawer({orthoInfoUrl, saveUrl, onSaved, onCancel}: Bound
     const [gridRows, setGridRows] = useState(3);
     const [gridCols, setGridCols] = useState(3);
     const [isDrawingGridBox, setIsDrawingGridBox] = useState(false);
-    const gridBoxLayerRef = useRef<L.Rectangle | null>(null);
+    const gridBoxLayerRef = useRef<any>(null);
 
     // ── Fetch ortho info ──────────────────────────────────────────────────────────
 
@@ -167,7 +149,7 @@ export function BoundaryDrawer({orthoInfoUrl, saveUrl, onSaved, onCancel}: Bound
 
     const pushHistory = useCallback(() => {
         const layers = drawnLayersRef.current?.getLayers() ?? [];
-        const features = layers.map(layerToFeature).filter((f): f is GeoJSON.Feature => f !== null);
+        const features = layers.map(layerToFeature).filter((f: any): f is GeoJSON.Feature => f !== null);
         historyRef.current = historyRef.current.slice(0, historyIdxRef.current + 1);
         historyRef.current.push(features);
         historyIdxRef.current = historyRef.current.length - 1;
@@ -184,38 +166,39 @@ export function BoundaryDrawer({orthoInfoUrl, saveUrl, onSaved, onCancel}: Bound
         });
     }, []);
 
-    const addLayerListeners = useCallback((layer: L.Layer) => {
-        const layerAny = layer as any;
+    const addLayerListeners = useCallback((layer: any) => {
         layer.on("click", (e: any) => {
-            L.DomEvent.stopPropagation(e);
+            const L = LRef.current;
+            if (L) L.DomEvent.stopPropagation(e);
             if (selectedLayersRef.current.has(layer)) {
                 selectedLayersRef.current.delete(layer);
-                layerAny.setStyle?.(DEFAULT_STYLE);
+                layer.setStyle?.(DEFAULT_STYLE);
             } else {
                 selectedLayersRef.current.add(layer);
-                layerAny.setStyle?.(SELECTED_STYLE);
+                layer.setStyle?.(SELECTED_STYLE);
             }
             setSelectedCount(selectedLayersRef.current.size);
         });
-        layerAny.on("pm:update", pushHistory);
-        layerAny.on("pm:dragend", () => {
+        layer.on("pm:update", pushHistory);
+        layer.on("pm:dragend", () => {
             pushHistory();
             if (isMoveModeRef.current) exitMoveMode();
         });
     }, [pushHistory, exitMoveMode]);
 
     const restoreFeatures = useCallback((features: GeoJSON.Feature[]) => {
+        const L = LRef.current;
         const drawnLayers = drawnLayersRef.current;
-        if (!drawnLayers) return;
+        if (!drawnLayers || !L) return;
         if (isMoveModeRef.current) exitMoveMode();
         selectedLayersRef.current.clear();
         setSelectedCount(0);
         drawnLayers.clearLayers();
         if (features.length > 0) {
             L.geoJSON(
-                {type: "FeatureCollection", features} as GeoJSON.FeatureCollection,
-                {style: DEFAULT_STYLE},
-            ).eachLayer((l) => {
+                { type: "FeatureCollection", features } as GeoJSON.FeatureCollection,
+                { style: DEFAULT_STYLE },
+            ).eachLayer((l: any) => {
                 addLayerListeners(l);
                 drawnLayers.addLayer(l);
             });
@@ -233,14 +216,13 @@ export function BoundaryDrawer({orthoInfoUrl, saveUrl, onSaved, onCancel}: Bound
             gridBoxLayerRef.current = null;
         }
         setIsDrawingGridBox(true);
-        const mapAny = map as any;
-        mapAny.pm?.enableDraw("Polygon", {pathOptions: {color: "#f97316", weight: 2, fillOpacity: 0.1}});
+        map.pm?.enableDraw("Polygon", { pathOptions: { color: "#f97316", weight: 2, fillOpacity: 0.1 } });
 
         const onCreated = (e: any) => {
-            mapAny.pm?.disableDraw();
+            map.pm?.disableDraw();
             map.off("pm:create", onCreated);
-            const rect: L.Rectangle = e.layer;
-            rect.setStyle({color: "#f97316", weight: 2, dashArray: "6 4", fillOpacity: 0.05});
+            const rect = e.layer;
+            rect.setStyle({ color: "#f97316", weight: 2, dashArray: "6 4", fillOpacity: 0.05 });
             rect.addTo(map);
             gridBoxLayerRef.current = rect;
             setIsDrawingGridBox(false);
@@ -249,19 +231,20 @@ export function BoundaryDrawer({orthoInfoUrl, saveUrl, onSaved, onCancel}: Bound
     }, []);
 
     const applyGrid = useCallback(() => {
+        const L = LRef.current;
         const map = mapRef.current;
         const drawnLayers = drawnLayersRef.current;
         const gridBox = gridBoxLayerRef.current;
-        if (!map || !drawnLayers || !gridBox) return;
+        if (!map || !drawnLayers || !gridBox || !L) return;
         const bounds = gridBox.getBounds();
         const features = generateGridFeatures(bounds, gridRows, gridCols);
         selectedLayersRef.current.clear();
         setSelectedCount(0);
         drawnLayers.clearLayers();
         L.geoJSON(
-            {type: "FeatureCollection", features} as GeoJSON.FeatureCollection,
-            {style: GRID_STYLE},
-        ).eachLayer((l) => {
+            { type: "FeatureCollection", features } as GeoJSON.FeatureCollection,
+            { style: GRID_STYLE },
+        ).eachLayer((l: any) => {
             addLayerListeners(l);
             drawnLayers.addLayer(l);
         });
@@ -276,21 +259,40 @@ export function BoundaryDrawer({orthoInfoUrl, saveUrl, onSaved, onCancel}: Bound
             gridBoxLayerRef.current = null;
         }
         setIsDrawingGridBox(false);
-        (mapRef.current as any)?.pm?.disableDraw();
+        mapRef.current?.pm?.disableDraw();
     }, []);
 
-    // ── Map initialisation — Geoman loaded dynamically to avoid SSR crash ─────────
+    // ── Map initialisation — all browser-only code loaded dynamically ─────────────
 
     useEffect(() => {
         if (!orthoInfo?.available || !orthoInfo.bounds || !mapContainerRef.current) return;
         if (mapRef.current) return;
 
+        const orthoBounds = orthoInfo.bounds;
+        const orthoPath = orthoInfo.path;
+        const existingGeoJson = orthoInfo.existing_geojson;
+
         let cancelled = false;
 
-        import("@geoman-io/leaflet-geoman-free").then(() => {
+        // Load Leaflet, CSS and Geoman all dynamically — nothing browser-specific runs at module level
+        Promise.all([
+            import("leaflet"),
+            import("leaflet/dist/leaflet.css"),
+            import("@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css"),
+            import("@geoman-io/leaflet-geoman-free"),
+        ]).then(([L]) => {
             if (cancelled || !mapContainerRef.current || mapRef.current) return;
 
-            const bounds = L.latLngBounds(orthoInfo.bounds![0], orthoInfo.bounds![1]);
+            LRef.current = L;
+
+            delete (L.Icon.Default.prototype as any)._getIconUrl;
+            L.Icon.Default.mergeOptions({
+                iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+                iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+                shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+            });
+
+            const bounds = L.latLngBounds(orthoBounds[0], orthoBounds[1]);
             const map = L.map(mapContainerRef.current, {
                 crs: L.CRS.EPSG3857,
                 center: bounds.getCenter(),
@@ -305,8 +307,8 @@ export function BoundaryDrawer({orthoInfoUrl, saveUrl, onSaved, onCancel}: Bound
                 opacity: 0.4,
             }).addTo(map);
 
-            if (orthoInfo.path) {
-                L.imageOverlay(orthoInfo.path, bounds, {opacity: 0.9}).addTo(map);
+            if (orthoPath) {
+                L.imageOverlay(orthoPath, bounds, { opacity: 0.9 }).addTo(map);
             }
             map.fitBounds(bounds);
 
@@ -314,12 +316,12 @@ export function BoundaryDrawer({orthoInfoUrl, saveUrl, onSaved, onCancel}: Bound
             drawnLayersRef.current = drawnLayers;
             drawnLayers.addTo(map);
 
-            const initialFeatures = orthoInfo.existing_geojson?.features ?? [];
+            const initialFeatures = existingGeoJson?.features ?? [];
             if (initialFeatures.length > 0) {
                 L.geoJSON(
-                    {type: "FeatureCollection", features: initialFeatures} as GeoJSON.FeatureCollection,
-                    {style: DEFAULT_STYLE},
-                ).eachLayer((l) => {
+                    { type: "FeatureCollection", features: initialFeatures } as GeoJSON.FeatureCollection,
+                    { style: DEFAULT_STYLE },
+                ).eachLayer((l: any) => {
                     addLayerListeners(l);
                     drawnLayers.addLayer(l);
                 });
@@ -331,9 +333,7 @@ export function BoundaryDrawer({orthoInfoUrl, saveUrl, onSaved, onCancel}: Bound
             setCanUndo(false);
             setCanRedo(false);
 
-            const mapAny = map as any;
-            // pm is now guaranteed to exist because Geoman was imported above
-            mapAny.pm.addControls({
+            map.pm.addControls({
                 position: "topleft",
                 drawMarker: false,
                 drawCircleMarker: false,
@@ -348,7 +348,7 @@ export function BoundaryDrawer({orthoInfoUrl, saveUrl, onSaved, onCancel}: Bound
                 removalMode: true,
                 rotateMode: false,
             });
-            mapAny.pm.setGlobalOptions({layerGroup: drawnLayers, pathOptions: DEFAULT_STYLE});
+            map.pm.setGlobalOptions({ layerGroup: drawnLayers, pathOptions: DEFAULT_STYLE });
 
             map.on("pm:create", (e: any) => {
                 if (e.layer) addLayerListeners(e.layer);
@@ -410,13 +410,13 @@ export function BoundaryDrawer({orthoInfoUrl, saveUrl, onSaved, onCancel}: Bound
 
     const handleSave = async () => {
         const layers = drawnLayersRef.current?.getLayers() ?? [];
-        const features = layers.map(layerToFeature).filter((f): f is GeoJSON.Feature => f !== null);
+        const features = layers.map(layerToFeature).filter((f: any): f is GeoJSON.Feature => f !== null);
         if (features.length === 0) return;
         setIsSaving(true);
         try {
             const res = await fetch(saveUrl, {
                 method: "POST",
-                headers: {"Content-Type": "application/json"},
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     type: "FeatureCollection",
                     features,
@@ -499,7 +499,7 @@ export function BoundaryDrawer({orthoInfoUrl, saveUrl, onSaved, onCancel}: Bound
             </div>
 
             {/* ── Map ───────────────────────────────────────────────────────────────── */}
-            <div ref={mapContainerRef} className="w-full rounded-xl" style={{height: 520}}/>
+            <div ref={mapContainerRef} className="w-full rounded-xl" style={{ height: 520 }} />
 
             {/* ── Footer actions ────────────────────────────────────────────────────── */}
             <div className="flex gap-3 justify-end">

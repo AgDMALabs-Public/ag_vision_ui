@@ -138,7 +138,7 @@ export default function FieldBoundaryGenerator() {
                 </button>
             )}
 
-            {showDrawer && resolvedPath && (
+            {showDrawer && resolvedPath && fieldPath && (
                 <section className="w-full bg-gray-800 rounded-2xl p-6">
                     <h2 className="text-2xl font-semibold text-white mb-4">Draw Plot Boundaries</h2>
                     <FieldDrawer

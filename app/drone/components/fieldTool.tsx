@@ -1,11 +1,7 @@
 "use client";
 
-import "leaflet/dist/leaflet.css";
-import "@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css";
-// No static JS import of geoman here — loaded dynamically below
-
-import { useCallback, useEffect, useRef, useState } from "react";
-import L from "leaflet";
+// No top-level Leaflet import — loaded entirely dynamically to prevent SSR crash
+import { useEffect, useRef, useState } from "react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -32,18 +28,8 @@ export function FieldDrawer({ orthoInfoUrl, saveUrl, onSaved, onCancel }: FieldD
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const mapContainerRef = useRef<HTMLDivElement>(null);
-    const mapRef = useRef<L.Map | null>(null);
-    const drawnLayersRef = useRef<L.FeatureGroup | null>(null);
-
-    // ── Fix Leaflet default icons for Next.js ───────────────────────────────────
-    useEffect(() => {
-        delete (L.Icon.Default.prototype as any)._getIconUrl;
-        L.Icon.Default.mergeOptions({
-            iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-            iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-            shadowUrl: "https://unpkg.com/leaflet@1:9.4/dist/images/marker-shadow.png",
-        });
-    }, []);
+    const mapRef = useRef<any>(null);
+    const drawnLayersRef = useRef<any>(null);
 
     // ── Fetch Ortho Info ────────────────────────────────────────────────────────
 
@@ -65,16 +51,31 @@ export function FieldDrawer({ orthoInfoUrl, saveUrl, onSaved, onCancel }: FieldD
         if (!orthoInfo?.available || !orthoInfo.bounds || !mapContainerRef.current) return;
         if (mapRef.current) return;
 
+        // Capture into local consts before the async boundary
+        const orthoBounds = orthoInfo.bounds;
+        const orthoPath = orthoInfo.path;
+        const existingGeoJson = orthoInfo.existing_geojson;
+
         let cancelled = false;
 
-        // Import Geoman dynamically to prevent SSR errors
-        import("@geoman-io/leaflet-geoman-free").then(() => {
+        // Load Leaflet, CSS and Geoman all dynamically — nothing browser-specific runs at module level
+        Promise.all([
+            import("leaflet"),
+            import("leaflet/dist/leaflet.css"),
+            import("@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css"),
+            import("@geoman-io/leaflet-geoman-free"),
+        ]).then(([L]) => {
             if (cancelled || !mapContainerRef.current || mapRef.current) return;
 
-            // Import CSS for Geoman
-            import("@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css");
+            // Fix Leaflet default icons
+            delete (L.Icon.Default.prototype as any)._getIconUrl;
+            L.Icon.Default.mergeOptions({
+                iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+                iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+                shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+            });
 
-            const bounds = L.latLngBounds(orthoInfo.bounds[0], orthoInfo.bounds[1]);
+            const bounds = L.latLngBounds(orthoBounds[0], orthoBounds[1]);
             const map = L.map(mapContainerRef.current, {
                 crs: L.CRS.EPSG3857,
                 center: bounds.getCenter(),
@@ -91,8 +92,8 @@ export function FieldDrawer({ orthoInfoUrl, saveUrl, onSaved, onCancel }: FieldD
             }).addTo(map);
 
             // Add Orthomosaic Image if exists
-            if (orthoInfo.path) {
-                L.imageOverlay(orthoInfo.path, bounds, { opacity: 0.9 }).addTo(map);
+            if (orthoPath) {
+                L.imageOverlay(orthoPath, bounds, { opacity: 0.9 }).addTo(map);
             }
             map.fitBounds(bounds);
 
@@ -102,9 +103,9 @@ export function FieldDrawer({ orthoInfoUrl, saveUrl, onSaved, onCancel }: FieldD
             drawnLayers.addTo(map);
 
             // Load existing boundaries if any
-            if (orthoInfo.existing_geojson?.features) {
+            if (existingGeoJson?.features) {
                 L.geoJSON(
-                    orthoInfo.existing_geojson as GeoJSON.FeatureCollection,
+                    existingGeoJson as GeoJSON.FeatureCollection,
                     { style: { color: "#2563eb", weight: 2, fillOpacity: 0.2 } }
                 ).eachLayer((layer) => {
                     drawnLayers.addLayer(layer);
@@ -123,8 +124,7 @@ export function FieldDrawer({ orthoInfoUrl, saveUrl, onSaved, onCancel }: FieldD
 
             // Listen for new shapes being drawn
             map.on("pm:create", (e: any) => {
-                const layer = e.layer;
-                drawnLayers.addLayer(layer);
+                drawnLayers.addLayer(e.layer);
             });
 
             // Listen for removals
@@ -140,7 +140,7 @@ export function FieldDrawer({ orthoInfoUrl, saveUrl, onSaved, onCancel }: FieldD
                 mapRef.current = null;
             }
         };
-    }, [orthoInfo]); // Note: logic simplified for brevity
+    }, [orthoInfo]);
 
     // ── Save Logic ──────────────────────────────────────────────────────────────
 
@@ -148,9 +148,9 @@ export function FieldDrawer({ orthoInfoUrl, saveUrl, onSaved, onCancel }: FieldD
         if (!drawnLayersRef.current) return;
 
         const layers = drawnLayersRef.current.getLayers();
-        const features = layers.map((layer) => {
-            return (layer as any).toGeoJSON();
-        }).filter((f: any) => f !== null);
+        const features = layers
+            .map((layer: any) => layer.toGeoJSON())
+            .filter((f: any) => f !== null);
 
         if (features.length === 0) {
             setErrorMessage("Please draw at least one polygon before saving.");
@@ -164,14 +164,12 @@ export function FieldDrawer({ orthoInfoUrl, saveUrl, onSaved, onCancel }: FieldD
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     type: "FeatureCollection",
-                    features: features,
+                    features,
                     targetPath: new URL(saveUrl, window.location.origin).searchParams.get("path"),
-
                 }),
             });
 
             if (!res.ok) throw new Error(`Server error: ${res.status}`);
-
             onSaved();
         } catch (e) {
             setErrorMessage(`Save failed: ${(e as Error).message}`);

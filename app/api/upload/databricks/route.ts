@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
 
     let config;
     try {
-        config = getDatabricksConfig();
+        config = await getDatabricksConfig();
     } catch (e) {
         return NextResponse.json({error: (e as Error).message}, {status: 500});
     }

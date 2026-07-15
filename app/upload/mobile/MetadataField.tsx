@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getBasePath } from "../../lib/basePath";
 
 interface MetadataFieldProps {
     label: string;
@@ -33,7 +34,8 @@ export default function MetadataField({
         setFreeText(false);
         onChange("");
 
-        const url = `/api/upload/databricks/list?path=${encodeURIComponent(volumePath)}${listFiles ? "&files=true" : ""}`;
+        const base = getBasePath();
+        const url = `${base}/api/upload/databricks/list?path=${encodeURIComponent(volumePath)}${listFiles ? "&files=true" : ""}`;
 
         fetch(url)
             .then((r) => r.json())
