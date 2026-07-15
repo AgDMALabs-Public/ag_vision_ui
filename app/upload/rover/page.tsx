@@ -3,12 +3,10 @@ import UploadForm from "../components/UploadForm";
 const VOLUME_FIELDS = [
   { key: "country",        label: "Country" },
   { key: "site",           label: "Site" },
-  { key: "year",           label: "Year" },
-  { key: "crop",           label: "Crop" },
+  { key: "season",           label: "Season (YYYY:Country:Crop:PlantingTime) Format" },
   { key: "trial",          label: "Trial" },
   { key: "field",          label: "Field" },
   { key: "location",       label: "Location" },
-  { key: "timeOfYear",     label: "Time of Year" },
   { key: "task",           label: "Task" },
   { key: "protocol",       label: "Protocol" },
   { key: "device",         label: "Device" },

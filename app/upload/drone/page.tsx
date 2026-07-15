@@ -1,40 +1,26 @@
-import UploadForm from "../components/UploadForm";
+import Link from "next/link";
 
-const VOLUME_FIELDS = [
-  { key: "project",        label: "Project" },
-  { key: "site",           label: "Site" },
-  { key: "season",           label: "Season" },
-  { key: "trial",          label: "Trial" },
-  { key: "field",          label: "Field" },
-  { key: "location",       label: "Location" },
-  { key: "task",           label: "Task" },
-  { key: "protocol",       label: "Protocol" },
-];
-
-const EXTRA_FIELDS = [
-  { key: "cameraType",          label: "Camera Type" },
-  { key: "cameraMake",          label: "Camera Make" },
-  { key: "cameraModel",         label: "Camera Model" },
-  { key: "missionName",         label: "Mission Name" },
-  { key: "flightHeight",        label: "Flight Height (m)",       type: "number", min: 0, step: 0.1 },
-  { key: "flightDate",          label: "Flight Date",             type: "date" },
-  { key: "verticalOverlap",     label: "Vertical Overlap (%)",    type: "number", min: 0, max: 100, step: 1 },
-  { key: "horizontalOverlap",   label: "Horizontal Overlap (%)",  type: "number", min: 0, max: 100, step: 1 },
-  { key: "reflectancePanels",   label: "Reflectance Panels Used", type: "boolean" },
-  // Only shown & required when reflectancePanels === "yes"
-  { key: "panelType",           label: "Panel Type",              requiredWhen: { key: "reflectancePanels", value: "yes" } },
-];
-
-const PATH_TEMPLATE =
-    "/Volumes/{catalog}/{schema}/{volume}/{project}/{site}/{trial}/{season}/{field}/{location}/drone/{missionName}/{flightDate}/raw_data/{cameraType}/{fileName}";
-
-export default function DroneUpload() {
-  return (
-    <UploadForm
-      title="Drone Upload"
-      volumeFields={VOLUME_FIELDS}
-      extraFields={EXTRA_FIELDS}
-      pathTemplate={PATH_TEMPLATE}
-    />
-  );
+export default function Home() {
+    return (
+        <main className="page-container">
+            <h1 className="title">AGV Upload</h1>
+            <div className="nav-button-container">
+                <Link href="/upload/drone/raw_data">
+                    <button className="nav-button">
+                        Raw Data
+                    </button>
+                </Link>
+                <Link href="/upload/drone/orthomosaics">
+                    <button className="nav-button">
+                        Orthos
+                    </button>
+                </Link>
+                <Link href="/upload/drone/plot_details" className="nav-button">
+                    <button className="nav-button">
+                        Plot Details
+                    </button>
+                </Link>
+            </div>
+        </main>
+    );
 }

@@ -6,7 +6,7 @@ const VOLUME_FIELDS = [
     {key: "project", label: "Project"},
     {key: "site", label: "Site"},
     {key: "trial", label: "Trial"},
-    {key: "season", label: "Season"},
+    {key: "season", label: "Season (YYYY:Country:Crop:PlantingTime) Format"},
     {key: "field", label: "Field"},
     {key: "location", label: "Location"},
     {key: "task", label: "Task"},

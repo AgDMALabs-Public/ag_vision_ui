@@ -53,7 +53,7 @@ export default function MetadataField({
     if (type === "date") {
         return (
             <div className="flex flex-col gap-1">
-                <label className="text-gray-300 text-sm font-medium">{label}</label>
+                <label className="caption">{label}</label>
                 <input
                     type="date"
                     value={value}
@@ -67,7 +67,7 @@ export default function MetadataField({
 
     return (
         <div className="flex flex-col gap-1">
-            <label className="text-gray-300 text-sm font-medium">{label}</label>
+            <label className="caption">{label}</label>
             {loading ? (
                 <div className="bg-gray-700 rounded-lg px-3 py-2 text-gray-400 text-sm animate-pulse">
                     Loading...

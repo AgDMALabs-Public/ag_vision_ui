@@ -11,7 +11,6 @@ This Project is to ease the uploading of Imagery data and adding field and plot 
 * Upload raw drone data
 * Upload the ground control points.
 * Upload the orthomosaics.
-* Upload the DEM maps.
 * Upload the field boundary
 * Upload the plot boundaries
 
