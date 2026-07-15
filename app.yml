@@ -1,1 +1,8 @@
 command: ["node", ".next/standalone/server.js"]
+env:
+  - name: PORT
+    value: "8000"
+  - name: HOSTNAME
+    value: "0.0.0.0"
+
+

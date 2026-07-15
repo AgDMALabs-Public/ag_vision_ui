@@ -1,4 +1,3 @@
-// app/settings/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -8,13 +7,25 @@ export default function SettingsPage() {
     const { config, setConfig } = useVolumeConfig();
     const [form, setForm] = useState(config);
     const [saved, setSaved] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => { setForm(config); }, [config]);
 
-    const handleSave = () => {
-        setConfig(form);
-        setSaved(true);
-        setTimeout(() => setSaved(false), 2000);
+    const handleSave = async () => {
+        setError(null);
+        try {
+            const res = await fetch("/api/config", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(form),
+            });
+            if (!res.ok) throw new Error(`Server error ${res.status}`);
+            setConfig(form);
+            setSaved(true);
+            setTimeout(() => setSaved(false), 2000);
+        } catch (e) {
+            setError((e as Error).message);
+        }
     };
 
     return (
@@ -24,7 +35,7 @@ export default function SettingsPage() {
             <section className="w-full max-w-xl bg-gray-800 rounded-2xl p-8 flex flex-col gap-6">
                 <h2 className="text-2xl font-semibold text-white">Volume Configuration</h2>
                 <p className="text-gray-400 text-sm">
-                    Set the Databricks Unity Catalog target for uploads. This is saved locally in your browser.
+                    Set the Databricks Unity Catalog target for uploads. Settings are persisted on the server.
                 </p>
 
                 {(["catalog", "schema", "volume"] as const).map((field) => (
@@ -39,6 +50,8 @@ export default function SettingsPage() {
                         />
                     </div>
                 ))}
+
+                {error && <p className="text-red-400 text-sm">{error}</p>}
 
                 <button
                     onClick={handleSave}
