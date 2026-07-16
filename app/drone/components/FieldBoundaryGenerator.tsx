@@ -8,8 +8,8 @@ import { FieldDrawer } from "./fieldTool";
 const PATH_TEMPLATE =
     "/Volumes/{catalog}/{schema}/{volume}/{project}/{site}/{trial}/{season}/{field}/{location}/drone/{missionName}/{flightDate}/orthomosaic/{orthoName}/{cameraType}/{fileName}";
 
-const FIELD_TEMPLATE =
-    "/Volumes/{catalog}/{schema}/{volume}/{project}/{site}/{trial}/{season}/{field}/{location}/drone/{missionName}/field_data/field_boundary.geojson";
+const LOCATION_TEMPLATE =
+    "/Volumes/{catalog}/{schema}/{volume}/{project}/{site}/{trial}/{season}/{field}/{location}/drone/{missionName}/field_data/location_boundary.geojson";
 
 
 const FIELDS = [
@@ -80,7 +80,7 @@ export default function FieldBoundaryGenerator() {
         : null;
 
     const fieldPath = allSelected
-        ? FIELD_TEMPLATE.replace(/\{(\w+)\}/g, (_, key) => {
+        ? LOCATION_TEMPLATE.replace(/\{(\w+)\}/g, (_, key) => {
             if (key === "catalog") return config.catalog;
             if (key === "schema")  return config.schema;
             if (key === "volume")  return config.volume;
