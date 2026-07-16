@@ -1,5 +1,5 @@
 import UploadForm from "../../components/UploadForm";
-import { CAMERA_TYPES, STITCHING_SOFTWARE, CAMERA_MAKE } from "@/app/lib/constants";
+import { CAMERA_TYPES, STITCHING_SOFTWARE, CAMERA_MAKE, ORTHOMOSAIC_TEMPLATE } from "@/app/lib/constants";
 
 
 const VOLUME_FIELDS = [
@@ -22,8 +22,7 @@ const EXTRA_FIELDS = [
     {key: "stichingDate", label: "Stiching Date", type: "date"},
 ];
 
-const PATH_TEMPLATE =
-    "/Volumes/{catalog}/{schema}/{volume}/{project}/{site}/{trial}/{season}/{field}/{location}/drone/{missionName}/{flightDate}/orthomosaic/{software}_{stichingDate}/{cameraType}/{fileName}";
+
 
 export default function DroneUpload() {
     return (
@@ -31,7 +30,7 @@ export default function DroneUpload() {
             title="Orthomosaic Upload"
             volumeFields={VOLUME_FIELDS}
             extraFields={EXTRA_FIELDS}
-            pathTemplate={PATH_TEMPLATE}
+            pathTemplate={ORTHOMOSAIC_TEMPLATE}
         />
     );
 }

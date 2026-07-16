@@ -16,6 +16,8 @@ export interface FieldDef {
     step?: number;
     requiredWhen?: { key: string; value: string };
     options?: readonly string[];
+    metadataSchema?: Record<string, any>;
+    metadataFilePath?: string;
 }
 
 export interface FileUploadState {
@@ -37,7 +39,9 @@ interface UploadFormProps {
     extraFields?: FieldDef[];
     pathTemplate: string;
     fileValidation?: FileValidation;
-
+    metadataTemplate?: string; // Path for the JSON, e.g., ".../{fileName}.json"
+    metadataSchema?: Record<string, string>; // Maps output JSON key -> metadata source key
+    customMetadata?: Record<string, any>; // Add this line
 }
 
 const STATUS_LABEL: Record<FileUploadState["status"], string> = {
@@ -94,7 +98,7 @@ function resolvePath(
     );
 }
 
-async function validateCsvFile(file: File, requiredColumns: string[]): Promise<{ valid: boolean; error?: string }> {
+async function validateCsvFile(file: File, requiredColumns: readonly string[]): Promise<{ valid: boolean; error?: string }> {
     return new Promise((resolve) => {
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -134,6 +138,9 @@ export default function UploadForm({
                                        extraFields = [],
                                        pathTemplate,
                                        fileValidation,
+                                       metadataSchema,
+                                       metadataTemplate,
+                                       customMetadata = {}
                                    }: UploadFormProps) {
     const initialMetadata = Object.fromEntries(
         [...volumeFields, ...extraFields].map((f) => [f.key, ""])
@@ -295,11 +302,49 @@ export default function UploadForm({
         setIsUploading(true);
         for (let i = 0; i < uploads.length; i++) {
             if (["exists", "skipped", "done"].includes(uploads[i].status)) continue;
+
             try {
-                await uploadFile(i, uploads[i].file);
-            } catch { /* continue */
+                const file = uploads[i].file;
+
+                // 1. Upload the main file
+                await uploadFile(i, file);
+
+                // 2. If metadata template is provided, upload the sidecar JSON
+                if (metadataTemplate && metadataSchema) {
+                    const jsonContent = {
+                        ...customMetadata, // Merged here
+                        ...Object.fromEntries(
+                            Object.entries(metadataSchema).map(([jsonKey, metaKey]) => [jsonKey, metadata[metaKey]])
+                        )
+                    };
+
+                    const jsonBlob = new Blob([JSON.stringify(jsonContent, null, 2)], {type: "application/json"});
+                    const jsonFilePath = resolvePath(metadataTemplate, metadata, file.name, config);
+
+                    const formData = new FormData();
+                    formData.append("file", jsonBlob, `${file.name}.json`);
+                    formData.append("filePath", jsonFilePath);
+
+                    // You can reuse your existing upload API endpoint or create a new one
+                    await fetch("/api/upload/databricks", {
+                        method: "POST",
+                        body: formData
+                    });
+                }
+            } catch (e) {
+                console.error("Upload failed", e);
             }
         }
+        setIsUploading(false);
+    };
+
+    const handleClear = () => {
+        setMetadata(initialMetadata);
+        setUploads([]);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+        setHasChecked(false);
         setIsUploading(false);
     };
 
@@ -311,8 +356,8 @@ export default function UploadForm({
     const metadataComplete = volumeComplete && extraComplete;
     const existsCount = uploads.filter((u) => u.status === "exists").length;
     const pendingCount = uploads.filter((u) => u.status === "pending").length;
-    const invalidCount = uploads.filter((u) => u.status === "invalid").length;
     const canUpload = hasChecked && pendingCount > 0 && !isUploading;
+    const hasAnyData = Object.values(metadata).some((v) => v.trim() !== "") || uploads.length > 0;
 
     return (
         <main className="page-container">
@@ -491,6 +536,13 @@ export default function UploadForm({
                     className="nav-button disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     {isUploading ? "Uploading..." : `Upload${pendingCount > 0 ? ` (${pendingCount})` : ""}`}
+                </button>
+                <button
+                    onClick={handleClear}
+                    disabled={!hasAnyData || isUploading}
+                    className="nav-button bg-gray-600 hover:bg-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    Clear
                 </button>
             </div>
         </main>

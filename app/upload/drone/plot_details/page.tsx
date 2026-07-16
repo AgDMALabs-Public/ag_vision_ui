@@ -1,5 +1,5 @@
 import UploadForm from "../../components/UploadForm";
-import {PLOT_MAP_COLS} from "@/app/lib/constants";
+import {PLOT_MAP_COLS, PLOT_BOOK_TEMPLATE} from "@/app/lib/constants";
 
 
 const VOLUME_FIELDS = [
@@ -15,8 +15,6 @@ const EXTRA_FIELDS = [
     {key: "missionName", label: "Mission Name"},
 ];
 
-const PB_TEMPLATE =
-    "/Volumes/{catalog}/{schema}/{volume}/{project}/{site}/{trial}/{season}/{field}/{location}/drone/{missionName}/field_data/plot_book.csv";
 
 const CSV_VALIDATION = {
     type: "csv" as const,
@@ -29,7 +27,7 @@ export default function DroneUpload() {
             title="Plot Details Upload"
             volumeFields={VOLUME_FIELDS}
             extraFields={EXTRA_FIELDS}
-            pathTemplate={PB_TEMPLATE}
+            pathTemplate={PLOT_BOOK_TEMPLATE}
             fileValidation={CSV_VALIDATION}
         />
     );

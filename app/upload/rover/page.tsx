@@ -1,4 +1,5 @@
 import UploadForm from "../components/UploadForm";
+import {RAW_ROVER_TEMPLATE} from "../../lib/constants"
 
 const VOLUME_FIELDS = [
   { key: "country",        label: "Country" },
@@ -21,8 +22,6 @@ const EXTRA_FIELDS = [
   { key: "horizontalOverlap", label: "Horizontal Overlap (%)", type: "number", min: 0, max: 100, step: 1 },
 ];
 
-const PATH_TEMPLATE =
-  "/Volumes/{country}/{site}/{year}/{crop}/{trial}/{field}/{location}/{timeOfYear}/{task}/{protocol}/{device}/{collectionDate}/{fileName}";
 
 export default function RoverUpload() {
   return (
@@ -30,7 +29,7 @@ export default function RoverUpload() {
       title="Rover Upload"
       volumeFields={VOLUME_FIELDS}
       extraFields={EXTRA_FIELDS}
-      pathTemplate={PATH_TEMPLATE}
+      pathTemplate={RAW_ROVER_TEMPLATE}
     />
   );
 }
