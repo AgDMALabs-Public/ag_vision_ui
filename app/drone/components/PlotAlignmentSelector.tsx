@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useVolumeConfig } from "../../context/VolumeConfigContext";
-import MetadataField from "../../upload/mobile/MetadataField";
+import MetadataField from "../../upload/components/MetadataField";
 import { BoundaryDrawer } from "./gridTool";
 
 const PATH_TEMPLATE =

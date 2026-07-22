@@ -10,7 +10,7 @@ const SETTINGS_PATH =
     process.env.SETTINGS_PATH ?? path.join(process.cwd(), "data", "settings.json");
 
 export function initFileWatcher() {
-    if (watchers.length > 0) return;
+    if (watchers.length > 0) return; // Already watching
 
     const watcher = chokidar.watch(SETTINGS_PATH, {
         persistent: true,

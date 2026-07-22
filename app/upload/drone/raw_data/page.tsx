@@ -15,9 +15,9 @@ const VOLUME_FIELDS = [
     {key: "trial", label: "Trial"},
     {key: "season", label: "Season (YYYY:Country:Crop:PlantingTime) Format"},
     {key: "field", label: "Field"},
-    {key: "loc", label: "Location"},
-    {key: "task", label: "Task"},
-    {key: "missionName", label: "Mission Name"},
+    {key: "location_name", label: "Location"},
+    {key: "missionName", label: "Mission Name", staticPathSegment: "drone"},
+    {key: "flightDate", label: "Flight Date", type: "date"},
 ];
 
 const EXTRA_FIELDS = [
@@ -27,7 +27,6 @@ const EXTRA_FIELDS = [
     {key: "cameraMake", label: "Camera Make", options: CAMERA_MAKE},
     {key: "cameraModel", label: "Camera Model"},
     {key: "flightHeight", label: "Flight Height (m)", type: "number", min: 0, step: 0.1},
-    {key: "flightDate", label: "Flight Date", type: "date"},
     {key: "verticalOverlap", label: "Vertical Overlap (%)", type: "number", min: 0, max: 100, step: 1},
     {key: "horizontalOverlap", label: "Horizontal Overlap (%)", type: "number", min: 0, max: 100, step: 1},
     {key: "reflectancePanels", label: "Reflectance Panels Used", type: "boolean"},
@@ -44,7 +43,7 @@ export default function DroneUpload() {
         "task": "task",
         "site": "site",
         "field": "field",
-        "location": "loc",
+        "location": "location_name",
         "trial": "trial",
         "droneMake": "droneMake",
         "droneModel": "droneModel",

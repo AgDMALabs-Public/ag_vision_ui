@@ -8,11 +8,8 @@ const VOLUME_FIELDS = [
     {key: "season", label: "Season (YYYY:Country:Crop:PlantingTime) Format"},
     {key: "trial", label: "Trial"},
     {key: "field", label: "Field"},
-    {key: "location", label: "Location"},
-];
-
-const EXTRA_FIELDS = [
-    {key: "missionName", label: "Mission Name"},
+    {key: "location_name", label: "Location"},
+    {key: "missionName", label: "Mission Name", staticPathSegment: "drone"},
 ];
 
 
@@ -26,7 +23,6 @@ export default function DroneUpload() {
         <UploadForm
             title="Plot Details Upload"
             volumeFields={VOLUME_FIELDS}
-            extraFields={EXTRA_FIELDS}
             pathTemplate={PLOT_BOOK_TEMPLATE}
             fileValidation={CSV_VALIDATION}
         />
