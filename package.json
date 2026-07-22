@@ -12,14 +12,16 @@
   "dependencies": {
     "@agv_ui/styles": "file:./packages/styles",
     "@geoman-io/leaflet-geoman-free": "^2.20.0",
+    "chokidar": "^4.0.3",
     "geotiff": "^3.0.5",
     "leaflet": "^1.9.4",
-    "next": "16.2.10",
+    "next": "^16.2.10",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/chokidar": "^2.1.3",
     "@types/leaflet": "^1.9.21",
     "@types/node": "^20",
     "@types/react": "^19",

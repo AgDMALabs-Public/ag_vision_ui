@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import '@agv_ui/styles';
-import MetadataField from "../../upload/mobile/MetadataField";
+import MetadataField from "../../upload/components/MetadataField";
 import { useVolumeConfig } from "../../context/VolumeConfigContext";
 
 export interface FieldDef {

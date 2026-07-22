@@ -2,7 +2,7 @@
 
 import {useRef, useState} from "react";
 import '@agv_ui/styles';
-import MetadataField from "../mobile/MetadataField";
+import MetadataField from "./MetadataField";
 
 import {useVolumeConfig} from "../../context/VolumeConfigContext";
 
@@ -18,6 +18,7 @@ export interface FieldDef {
     options?: readonly string[];
     metadataSchema?: Record<string, any>;
     metadataFilePath?: string;
+    staticPathSegment?: string;
 }
 
 export interface FileUploadState {
@@ -98,7 +99,10 @@ function resolvePath(
     );
 }
 
-async function validateCsvFile(file: File, requiredColumns: readonly string[]): Promise<{ valid: boolean; error?: string }> {
+async function validateCsvFile(file: File, requiredColumns: readonly string[]): Promise<{
+    valid: boolean;
+    error?: string
+}> {
     return new Promise((resolve) => {
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -155,12 +159,30 @@ export default function UploadForm({
     const {config, isConfigured} = useVolumeConfig();
     const volumeRoot = `/Volumes/${config.catalog}/${config.schema}/${config.volume}`;
 
-    function buildPathUpTo(index: number): string {
-        const keys = volumeFields.slice(0, index).map((f) => f.key);
-        const segments = keys.map((k) => metadata[k]);
-        if (segments.some((s) => !s)) return "";
-        return [volumeRoot, ...segments].join("/");
+    function buildPathUpTo(index: number, includeStaticOnly: boolean = false): string {
+        // Get fields up to (not including) the current index
+        const fieldsUpTo = volumeFields.slice(0, index);
+
+        // Check if all required metadata is filled
+        for (const field of fieldsUpTo) {
+            if (!metadata[field.key]) return "";
+        }
+
+        // Build path segments, accounting for static segments
+        const segments = [volumeRoot];
+
+        for (const field of fieldsUpTo) {
+            // Always add static segment if it exists
+            if (field.staticPathSegment) {
+                segments.push(field.staticPathSegment);
+            }
+            // Add the field's value
+            segments.push(metadata[field.key]);
+        }
+
+        return segments.filter(Boolean).join("/");
     }
+
 
     const handleVolumeFieldChange = (key: string, value: string) => {
         const index = volumeFields.findIndex((f) => f.key === key);
@@ -367,7 +389,7 @@ export default function UploadForm({
             <section className="card">
                 <h2 className="title-2">Collection Metadata</h2>
                 <div className="grid-container">
-                    {volumeFields.map(({key, label, type}, index) => {
+                    {volumeFields.map(({key, label, type, staticPathSegment}, index) => {
                         const volumePath = buildPathUpTo(index);
                         const isDisabled = index > 0 && !metadata[volumeFields[index - 1].key];
                         return (
@@ -379,6 +401,7 @@ export default function UploadForm({
                                 volumePath={volumePath || volumeRoot}
                                 type={type}
                                 disabled={isDisabled}
+                                staticPathSegment={staticPathSegment}
                             />
                         );
                     })}

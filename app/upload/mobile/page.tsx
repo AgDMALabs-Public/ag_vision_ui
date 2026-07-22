@@ -9,16 +9,15 @@ const VOLUME_FIELDS = [
     {key: "trial", label: "Trial"},
     {key: "season", label: "Season (YYYY:Country:Crop:PlantingTime) Format"},
     {key: "field", label: "Field"},
-    {key: "location", label: "Location"},
+    {key: "location_name", label: "Location"},
     {key: "task", label: "Task"},
-    {key: "protocol", label: "Protocol"},
+    {key: "protocol", label: "Protocol", staticPathSegment: "images"},
 ];
 
 // These fields come after the static "images" segment — entered manually
 const EXTRA_FIELDS = [
     {key: "collectionDate", label: "Date of Collection", type: "date"},
 ];
-
 
 
 export default function MobileUpload() {

@@ -28,6 +28,8 @@ This Project is to ease the uploading of Imagery data and adding field and plot 
 
 ### Set up
 * Teams will need to set the Catalog, schema, and volume where the data should be stored.
+* This need to be done before deplying the code. The current setting page is not updating on databricks.
+* If you need to update in data bricks go to the settings.json file in the workspace edit it there and then restart the server.
 * EX: 
   * Catalog: use1_prod_artemis_catalog_3718194974443840
   * Schema: Tier1_raw

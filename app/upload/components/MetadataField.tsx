@@ -11,6 +11,7 @@ interface MetadataFieldProps {
     type?: string;
     disabled?: boolean;
     listFiles?: boolean;
+    staticPathSegment?: string;
 }
 
 export default function MetadataField({
@@ -21,6 +22,7 @@ export default function MetadataField({
                                           type,
                                           disabled = false,
                                           listFiles = false,
+                                          staticPathSegment,
                                       }: MetadataFieldProps) {
     const [options, setOptions] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
@@ -34,8 +36,11 @@ export default function MetadataField({
         setFreeText(false);
         onChange("");
 
+        // Append static segment to path if provided
+        const browsePath = staticPathSegment ? `${volumePath}/${staticPathSegment}` : volumePath;
+
         const base = getBasePath();
-        const url = `${base}/api/upload/databricks/list?path=${encodeURIComponent(volumePath)}${listFiles ? "&files=true" : ""}`;
+        const url = `${base}/api/upload/databricks/list?path=${encodeURIComponent(browsePath)}${listFiles ? "&files=true" : ""}`;
 
         fetch(url)
             .then((r) => r.json())
@@ -48,7 +53,14 @@ export default function MetadataField({
             })
             .catch(() => setFreeText(true))
             .finally(() => setLoading(false));
-    }, [volumePath, type, listFiles]);
+    }, [volumePath, type, listFiles, staticPathSegment]);
+
+    const handleFreeTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const inputValue = e.target.value;
+        // Replace spaces with underscores
+        const normalizedValue = inputValue.replace(/\s+/g, "_");
+        onChange(normalizedValue);
+    };
 
     if (type === "date") {
         return (
@@ -77,12 +89,12 @@ export default function MetadataField({
                     <input
                         type="text"
                         value={value}
-                        onChange={(e) => onChange(e.target.value)}
+                        onChange={handleFreeTextChange}
                         disabled={disabled}
                         placeholder={`Enter ${label}`}
                         className="bg-gray-700 text-white rounded-lg px-3 py-2 border border-gray-600 focus:outline-none focus:border-blue-500 disabled:opacity-40"
                     />
-                    <span className="text-gray-500 text-xs">Not found in volume — enter manually</span>
+                    <span className="text-gray-500 text-xs">Not found in volume — enter manually (spaces will be converted to underscores)</span>
                 </div>
             ) : (
                 <div className="flex gap-2">

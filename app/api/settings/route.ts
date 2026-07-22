@@ -1,25 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { loadSettingsWithCache, initFileWatcher } from "../../lib/fileWatcher";
 import fs from "fs";
 import path from "path";
 
-// Initialize watcher on first request
-initFileWatcher();
+const SETTINGS_PATH = process.env.SETTINGS_PATH ?? path.join(process.cwd(), "data", "settings.json");
 
-const SETTINGS_PATH =
-    process.env.SETTINGS_PATH ?? path.join(process.cwd(), "data", "settings.json");
-
-console.log("[API Config] SETTINGS_PATH:", SETTINGS_PATH);
-
-
-export async function GET() {
-    const settings = loadSettingsWithCache();
-    return NextResponse.json(settings);
-}
-
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
     try {
-        const body = await req.json();
+        const body = await request.json();
 
         // Validate required fields
         if (!body.catalog || !body.schema || !body.volume) {
@@ -38,11 +25,11 @@ export async function POST(req: NextRequest) {
         // Write to settings.json
         fs.writeFileSync(SETTINGS_PATH, JSON.stringify(body, null, 2));
 
-        return NextResponse.json({ ok: true, message: "Settings saved" });
-    } catch (e) {
-        console.error("Error saving settings:", e);
+        return NextResponse.json({ success: true, message: "Settings saved" });
+    } catch (error) {
+        console.error("Error saving settings:", error);
         return NextResponse.json(
-            { error: (e as Error).message },
+            { error: "Failed to save settings" },
             { status: 500 }
         );
     }
