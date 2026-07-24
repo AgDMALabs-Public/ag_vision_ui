@@ -5,21 +5,8 @@ import '@agv_ui/styles';
 import MetadataField from "./MetadataField";
 
 import {useVolumeConfig} from "../../context/VolumeConfigContext";
+import {buildPathUpTo, type FieldDef} from "../../lib/pathUtils";
 
-
-export interface FieldDef {
-    key: string;
-    label: string;
-    type?: string;
-    min?: number;
-    max?: number;
-    step?: number;
-    requiredWhen?: { key: string; value: string };
-    options?: readonly string[];
-    metadataSchema?: Record<string, any>;
-    metadataFilePath?: string;
-    staticPathSegment?: string;
-}
 
 export interface FileUploadState {
     file: File;
@@ -28,6 +15,13 @@ export interface FileUploadState {
     error?: string;
     validationError?: string;
 }
+
+export interface FileTypeConfig {
+    extensions: string[];
+    mimeTypes: string[];
+    label: string; // e.g., "Images", "Videos", "Documents"
+}
+
 
 export interface FileValidation {
     type: "csv";
@@ -79,6 +73,30 @@ const BAR_COLOR: Record<FileUploadState["status"], string> = {
     invalid: "bg-red-500",
 
 };
+
+export const FILE_TYPE_CONFIGS = {
+    images: {
+        extensions: [".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".svg"],
+        mimeTypes: ["image/jpeg", "image/png", "image/gif", "image/webp", "image/bmp", "image/svg+xml"],
+        label: "Images"
+    } as FileTypeConfig,
+    videos: {
+        extensions: [".mp4", ".avi", ".mov", ".mkv", ".flv", ".wmv", ".webm"],
+        mimeTypes: ["video/mp4", "video/avi", "video/quicktime", "video/x-matroska", "video/x-flv", "video/x-ms-wmv", "video/webm"],
+        label: "Videos"
+    } as FileTypeConfig,
+    audio: {
+        extensions: [".mp3", ".wav", ".ogg", ".m4a", ".flac", ".aac"],
+        mimeTypes: ["audio/mpeg", "audio/wav", "audio/ogg", "audio/mp4", "audio/flac", "audio/aac"],
+        label: "Audio"
+    } as FileTypeConfig,
+    documents: {
+        extensions: [".pdf", ".doc", ".docx", ".txt", ".xls", ".xlsx", ".ppt", ".pptx"],
+        mimeTypes: ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "text/plain", "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.ms-powerpoint", "application/vnd.openxmlformats-officedocument.presentationml.presentation"],
+        label: "Documents"
+    } as FileTypeConfig,
+} as const;
+
 
 
 function resolvePath(
@@ -159,30 +177,9 @@ export default function UploadForm({
     const {config, isConfigured} = useVolumeConfig();
     const volumeRoot = `/Volumes/${config.catalog}/${config.schema}/${config.volume}`;
 
-    function buildPathUpTo(index: number, includeStaticOnly: boolean = false): string {
-        // Get fields up to (not including) the current index
-        const fieldsUpTo = volumeFields.slice(0, index);
-
-        // Check if all required metadata is filled
-        for (const field of fieldsUpTo) {
-            if (!metadata[field.key]) return "";
-        }
-
-        // Build path segments, accounting for static segments
-        const segments = [volumeRoot];
-
-        for (const field of fieldsUpTo) {
-            // Always add static segment if it exists
-            if (field.staticPathSegment) {
-                segments.push(field.staticPathSegment);
-            }
-            // Add the field's value
-            segments.push(metadata[field.key]);
-        }
-
-        return segments.filter(Boolean).join("/");
+    function getPathUpTo(index: number): string {
+        return buildPathUpTo(index, volumeFields, metadata, volumeRoot);
     }
-
 
     const handleVolumeFieldChange = (key: string, value: string) => {
         const index = volumeFields.findIndex((f) => f.key === key);
@@ -385,13 +382,36 @@ export default function UploadForm({
         <main className="page-container">
             <h1 className="title">{title}</h1>
 
-            {/* Volume-linked metadata */}
             <section className="card">
-                <h2 className="title-2">Collection Metadata</h2>
+                <h2 className="title-2">Select Field</h2>
                 <div className="grid-container">
-                    {volumeFields.map(({key, label, type, staticPathSegment}, index) => {
-                        const volumePath = buildPathUpTo(index);
+                    {volumeFields.map(({key, label, type, options}, index) => {
+                        const volumePath = getPathUpTo(index);
                         const isDisabled = index > 0 && !metadata[volumeFields[index - 1].key];
+
+                        if (options && options.length > 0) {
+                            return (
+                                <div key={key} className="flex flex-col gap-1">
+                                    <label className="title-3">{label}</label>
+                                    <select
+                                        value={metadata[key]}
+                                        onChange={(e) =>
+                                            handleVolumeFieldChange(key, e.target.value)
+                                        }
+                                        disabled={isDisabled}
+                                        className="bg-gray-700 text-white rounded-lg px-3 py-2 border border-gray-600 focus:outline-none focus:border-blue-500 disabled:opacity-40"
+                                    >
+                                        <option value="">Select {label}...</option>
+                                        {options.map((opt) => (
+                                            <option key={opt} value={opt}>
+                                                {opt}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            );
+                        }
+
                         return (
                             <MetadataField
                                 key={key}
@@ -401,7 +421,8 @@ export default function UploadForm({
                                 volumePath={volumePath || volumeRoot}
                                 type={type}
                                 disabled={isDisabled}
-                                staticPathSegment={staticPathSegment}
+                                staticPathSegment={volumeFields[index].staticPathSegment}
+                                fieldDef={volumeFields[index]}
                             />
                         );
                     })}

@@ -1,4 +1,4 @@
-import UploadForm from "../components/UploadForm";
+import UploadForm, {FILE_TYPE_CONFIGS} from "../components/UploadForm";
 import {MOBILE_SCOUTING_TEMPLATE} from "../../lib/constants"
 
 // These fields map directly to consecutive volume path segments for directory browsing:
@@ -7,16 +7,13 @@ const VOLUME_FIELDS = [
     {key: "project", label: "Project"},
     {key: "site", label: "Site"},
     {key: "trial", label: "Trial"},
-    {key: "season", label: "Season (YYYY:Country:Crop:PlantingTime) Format"},
+    {key: "season", label: "Season"},
     {key: "field", label: "Field"},
     {key: "location_name", label: "Location"},
     {key: "task", label: "Task"},
     {key: "protocol", label: "Protocol", staticPathSegment: "images"},
-];
-
-// These fields come after the static "images" segment — entered manually
-const EXTRA_FIELDS = [
-    {key: "collectionDate", label: "Date of Collection", type: "date"},
+    {key: "collectionDate", label: "Date of Collection", type: "date", skipInPathUpTo: true},
+    {key: "plot_id", label: "Plot ID", recursiveSearch: true, recursiveSearchDepth: 1},
 ];
 
 
@@ -25,8 +22,13 @@ export default function MobileUpload() {
         <UploadForm
             title="Mobile Upload"
             volumeFields={VOLUME_FIELDS}
-            extraFields={EXTRA_FIELDS}
             pathTemplate={MOBILE_SCOUTING_TEMPLATE}
+            fileValidation={{
+                type: "fileType",
+                fileTypeConfig: FILE_TYPE_CONFIGS.images,
+            }}
+
+
         />
     );
 }

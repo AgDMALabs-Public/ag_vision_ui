@@ -17,10 +17,14 @@ export default function Home() {
                         Data Upload
                     </button>
                 </Link>
-
                 <Link href="/field_management">
                     <button className="nav-button">
                         Field Management
+                    </button>
+                </Link>
+                <Link href="/scouting">
+                    <button className="nav-button">
+                        Scouting
                     </button>
                 </Link>
                 <Link href="/settings">
