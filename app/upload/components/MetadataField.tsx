@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getBasePath } from "../../lib/basePath";
+import {useEffect, useState} from "react";
+import {getBasePath} from "../../lib/basePath";
+import {type FieldDef} from "../../lib/pathUtils";
 
 interface MetadataFieldProps {
     label: string;
@@ -12,6 +13,7 @@ interface MetadataFieldProps {
     disabled?: boolean;
     listFiles?: boolean;
     staticPathSegment?: string;
+    fieldDef?: FieldDef;
 }
 
 export default function MetadataField({
@@ -23,6 +25,7 @@ export default function MetadataField({
                                           disabled = false,
                                           listFiles = false,
                                           staticPathSegment,
+                                          fieldDef,
                                       }: MetadataFieldProps) {
     const [options, setOptions] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
@@ -40,7 +43,10 @@ export default function MetadataField({
         const browsePath = staticPathSegment ? `${volumePath}/${staticPathSegment}` : volumePath;
 
         const base = getBasePath();
-        const url = `${base}/api/upload/databricks/list?path=${encodeURIComponent(browsePath)}${listFiles ? "&files=true" : ""}`;
+        // Add recursive flag and depth if field has recursiveSearch enabled
+        const recursiveFlag = fieldDef?.recursiveSearch ? "&recursive=true" : "";
+        const depthFlag = fieldDef?.recursiveSearchDepth ? `&depth=${fieldDef.recursiveSearchDepth}` : "";
+        const url = `${base}/api/upload/databricks/list?path=${encodeURIComponent(browsePath)}${listFiles ? "&files=true" : ""}${recursiveFlag}${depthFlag}`;
 
         fetch(url)
             .then((r) => r.json())
@@ -53,7 +59,8 @@ export default function MetadataField({
             })
             .catch(() => setFreeText(true))
             .finally(() => setLoading(false));
-    }, [volumePath, type, listFiles, staticPathSegment]);
+    }, [volumePath, type, listFiles, staticPathSegment, fieldDef?.recursiveSearch, fieldDef?.recursiveSearchDepth]);
+
 
     const handleFreeTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const inputValue = e.target.value;

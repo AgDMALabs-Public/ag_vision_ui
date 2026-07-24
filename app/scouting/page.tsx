@@ -5,16 +5,16 @@ import '@agv_ui/styles';
 export default function Home() {
     return (
         <main className="page-container">
-            <h1 className="title">Field Management</h1>
+            <h1 className="title">Scounting</h1>
             <div className="nav-button-container">
-                <Link href="/field_management/add_field">
+                <Link href="/scouting/add_note">
                     <button className="nav-button">
-                        Add Field
+                        Scouting Notes
                     </button>
                 </Link>
-                <Link href="/field_management/add_note">
+                <Link href="/scouting/image_capture">
                     <button className="nav-button">
-                        Add Note
+                        Image Capture
                     </button>
                 </Link>
             </div>

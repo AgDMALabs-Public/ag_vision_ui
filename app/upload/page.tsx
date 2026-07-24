@@ -5,9 +5,14 @@ export default function Home() {
         <main className="page-container">
             <h1 className="title">AGV Upload</h1>
             <div className="nav-button-container">
-                <Link href="/upload/mobile">
+                <Link href="/upload/image">
                     <button className="nav-button">
-                        Mobile Upload
+                        Image Upload
+                    </button>
+                </Link>
+                <Link href="/upload/video">
+                    <button className="nav-button">
+                        Video Upload
                     </button>
                 </Link>
                 <Link href="/upload/rover">

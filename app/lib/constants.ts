@@ -46,6 +46,13 @@ export const PLOT_BOOK_TEMPLATE = "/Volumes/{catalog}/{schema}/{volume}/{project
 
 export const ORTHOMOSAIC_TEMPLATE = "/Volumes/{catalog}/{schema}/{volume}/{project}/{site}/{trial}/{season}/{field}/{location_name}/drone/{missionName}/{flightDate}/orthomosaic/{software}_{stichingDate}/{cameraType}/{fileName}";
 
-export const MOBILE_SCOUTING_TEMPLATE = "/Volumes/{catalog}/{schema}/{volume}/{project}/{site}/{trial}/{season}/{field}/{location_name}/{task}/images/{protocol}/{collectionDate}/{fileName}";
+export const MOBILE_SCOUTING_TEMPLATE = "/Volumes/{catalog}/{schema}/{volume}/{project}/{site}/{trial}/{season}/{field}/{location_name}/{task}/images/{protocol}/{collectionDate}/{plot_id}/{fileName}";
+
+export const VIDEO_SCOUTING_TEMPLATE = "/Volumes/{catalog}/{schema}/{volume}/{project}/{site}/{trial}/{season}/{field}/{location_name}/{task}/videos/{protocol}/{collectionDate}/{plot_id}/{fileName}";
 
 export const RAW_ROVER_TEMPLATE = "/Volumes/{catalog}/{schema}/{volume}/{project}/{site}/{trial}/{season}/{field}/{location_name}/rover/{missionName}/{scanDate}/raw_data/{cameraType}/{fileName}";
+
+export const SCOUTING_NOTES_TEMPLATE = "/Volumes/{catalog}/{schema}/{volume}/{project}/{site}/{trial}/{season}/{field}/{location_name}/{task}/notes/{protocol}/{collectionDate}/{plot_id}/{noteFileName}";
+
+export const WEBCAM_IMAGE_TEMPLATE = "/Volumes/{catalog}/{schema}/{volume}/{project}/{site}/{trial}/{season}/{field}/{location_name}/{task}/images/{protocol}/{collectionDate}/{plot_id}/{noteFileName}";
+
