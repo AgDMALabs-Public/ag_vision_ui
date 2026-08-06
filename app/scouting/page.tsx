@@ -17,6 +17,11 @@ export default function Home() {
                         Image Capture
                     </button>
                 </Link>
+                <Link href="/scouting/video_capture">
+                    <button className="nav-button">
+                        Video Capture
+                    </button>
+                </Link>
             </div>
         </main>
     );

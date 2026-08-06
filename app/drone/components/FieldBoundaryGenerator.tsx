@@ -5,10 +5,10 @@ import { useVolumeConfig } from "../../context/VolumeConfigContext";
 import MetadataField from "../../upload/components/MetadataField";
 import { FieldDrawer } from "./fieldTool";
 
-const PATH_TEMPLATE =
+const ORTHO_PATH_TEMPLATE =
     "/Volumes/{catalog}/{schema}/{volume}/{project}/{site}/{trial}/{season}/{field}/{location}/drone/{missionName}/{flightDate}/orthomosaic/{orthoName}/{cameraType}/{fileName}";
 
-const LOCATION_TEMPLATE =
+const LOCATION_BOUNDARY_TEMPLATE =
     "/Volumes/{catalog}/{schema}/{volume}/{project}/{site}/{trial}/{season}/{field}/{location}/drone/{missionName}/field_data/location_boundary.geojson";
 
 
@@ -71,7 +71,7 @@ export default function FieldBoundaryGenerator() {
     const allSelected = FIELDS.every((f) => metadata[f.key]);
 
     const resolvedPath = allSelected
-        ? PATH_TEMPLATE.replace(/\{(\w+)\}/g, (_, key) => {
+        ? ORTHO_PATH_TEMPLATE.replace(/\{(\w+)\}/g, (_, key) => {
             if (key === "catalog") return config.catalog;
             if (key === "schema")  return config.schema;
             if (key === "volume")  return config.volume;
@@ -80,7 +80,7 @@ export default function FieldBoundaryGenerator() {
         : null;
 
     const fieldPath = allSelected
-        ? LOCATION_TEMPLATE.replace(/\{(\w+)\}/g, (_, key) => {
+        ? LOCATION_BOUNDARY_TEMPLATE.replace(/\{(\w+)\}/g, (_, key) => {
             if (key === "catalog") return config.catalog;
             if (key === "schema")  return config.schema;
             if (key === "volume")  return config.volume;
@@ -98,9 +98,9 @@ export default function FieldBoundaryGenerator() {
 
     return (
         <div className="flex flex-col gap-6 w-full max-w-3xl">
-            <section className="w-full bg-gray-800 rounded-2xl p-8">
-                <h2 className="text-2xl font-semibold text-white mb-6">Select Drone Flight</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <section className="card">
+                <h2 className="title-2">Select Drone Flight</h2>
+                <div className="grid-container">
                     {FIELDS.map((field, index) => (
                         <MetadataField
                             key={field.key}

@@ -30,6 +30,38 @@ export const DRONE_MODELS = [
     "DJI Mavic 3 Enterprise"
 ] as const;
 
+export const YEARS = [
+    "2020",
+    "2021",
+    "2022",
+    "2023",
+    "2024",
+    "2025",
+    "2026",
+    "2027",
+    "2028",
+    "2029",
+    "2030"
+] as const;
+
+export const COUNTRIES = [
+    "USA",
+    "IND",
+    "TZA",
+    "COL",
+    "KEN",
+    "NGA",
+] as const;
+
+
+export const CROPS = ["barley", "maize", "pearl_millet", "finger_millet", "rice", "sorghum", "wheat", "bush_bean",
+    "climbing_bean", "common_bean", "chickpea", 'cowpea', "faba_bean", "grass_pea",
+    "groundnut", "lentil", "pigeonpea", "soybean", "banana", "cassava", "potato",
+    "sweet_potato", "yam", "taro", "sugarcane", 'legumes', 'tomato', 'turmeric', 'sesame',
+    'onion']
+
+export const PLANTING_SEASON = ['summer', 'fall', 'winter', 'spring', 'short_rain', 'long_rain']
+
 export const PLOT_MAP_COLS = [
     "plot_id",
     "row",
@@ -55,4 +87,6 @@ export const RAW_ROVER_TEMPLATE = "/Volumes/{catalog}/{schema}/{volume}/{project
 export const SCOUTING_NOTES_TEMPLATE = "/Volumes/{catalog}/{schema}/{volume}/{project}/{site}/{trial}/{season}/{field}/{location_name}/{task}/notes/{protocol}/{collectionDate}/{plot_id}/{noteFileName}";
 
 export const WEBCAM_IMAGE_TEMPLATE = "/Volumes/{catalog}/{schema}/{volume}/{project}/{site}/{trial}/{season}/{field}/{location_name}/{task}/images/{protocol}/{collectionDate}/{plot_id}/{noteFileName}";
+
+export const WEBCAM_VIDEO_TEMPLATE = "/Volumes/{catalog}/{schema}/{volume}/{project}/{site}/{trial}/{season}/{field}/{location_name}/{task}/videos/{protocol}/{collectionDate}/{plot_id}/{noteFileName}";
 

@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import {useEffect, useRef, useState} from "react";
 
 interface WebcamCaptureProps {
     onPhotosCapture: (files: File[]) => void;
 }
 
-export default function WebcamCapture({ onPhotosCapture }: WebcamCaptureProps) {
+export default function WebcamCapture({onPhotosCapture}: WebcamCaptureProps) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -34,12 +34,12 @@ export default function WebcamCapture({ onPhotosCapture }: WebcamCaptureProps) {
         try {
             setErrorMessage(null);
 
-            // Request the highest possible resolution
             const mediaStream = await navigator.mediaDevices.getUserMedia({
                 video: {
-                    facingMode: "environment",
-                    width: { ideal: 4096 },
-                    height: { ideal: 2160 }
+                    facingMode: "user", // Switched to front-facing webcam
+                    width: {ideal: 1920},
+                    height: {ideal: 1080},
+                    aspectRatio: {ideal: 1.7777777778} // Forces 16:9 widescreen orientation
                 },
                 audio: false,
             });
@@ -122,7 +122,7 @@ export default function WebcamCapture({ onPhotosCapture }: WebcamCaptureProps) {
                 </button>
             ) : (
                 <>
-                    <div className="bg-gray-900 rounded-lg overflow-hidden border border-gray-700 h-[300px] sm:h-[400px]">
+                    <div className="image-box">
                         <video
                             ref={videoRef}
                             autoPlay
@@ -173,7 +173,7 @@ export default function WebcamCapture({ onPhotosCapture }: WebcamCaptureProps) {
                     <div className="flex gap-3">
                         <button
                             onClick={submitPhotos}
-                            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-4 py-2 font-medium transition"
+                            className="nav-button"
                         >
                             ✓ Add Photos to Upload
                         </button>
@@ -188,7 +188,7 @@ export default function WebcamCapture({ onPhotosCapture }: WebcamCaptureProps) {
             )}
 
             {/* Hidden canvas for taking the actual photo snapshots */}
-            <canvas ref={canvasRef} className="hidden" />
+            <canvas ref={canvasRef} className="hidden"/>
         </div>
     );
 }

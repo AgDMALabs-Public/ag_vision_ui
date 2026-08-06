@@ -12,11 +12,6 @@ export default function Home() {
                         Add Field
                     </button>
                 </Link>
-                <Link href="/field_management/add_note">
-                    <button className="nav-button">
-                        Add Note
-                    </button>
-                </Link>
             </div>
         </main>
     );

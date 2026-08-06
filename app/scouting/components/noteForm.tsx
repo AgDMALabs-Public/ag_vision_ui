@@ -407,14 +407,14 @@ export default function NoteForm({
                 <button
                     onClick={handleSaveNote}
                     disabled={!canSave || isSaving}
-                    className="nav-button disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="nav-button"
                 >
                     {isSaving ? "Saving..." : "Save Note"}
                 </button>
                 <button
                     onClick={handleClear}
                     disabled={!hasAnyData || isSaving}
-                    className="nav-button bg-gray-600 hover:bg-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="nav-button"
                 >
                     Clear
                 </button>

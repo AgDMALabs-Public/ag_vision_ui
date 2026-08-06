@@ -128,7 +128,7 @@ export default function DirectoryForm({
                                         value={metadata[key]}
                                         onChange={(e) => handleVolumeFieldChange(key, e.target.value)}
                                         disabled={isDisabled}
-                                        className="bg-gray-700 text-white rounded-lg px-3 py-2 border border-gray-600 focus:outline-none focus:border-blue-500 disabled:opacity-40"
+                                        className="form-input"
                                     >
                                         <option value="">Select {label}...</option>
                                         {options.map((opt) => (
@@ -167,7 +167,7 @@ export default function DirectoryForm({
                                         <select
                                             value={metadata[key]}
                                             onChange={(e) => handleExtraFieldChange(key, e.target.value)}
-                                            className="bg-gray-700 text-white rounded-lg px-3 py-2 border border-gray-600 focus:outline-none focus:border-blue-500"
+                                            className="form-input"
                                         >
                                             <option value="">Select {label}...</option>
                                             {options.map((opt) => (
@@ -186,7 +186,7 @@ export default function DirectoryForm({
                                         value={metadata[key]}
                                         onChange={(e) => handleExtraFieldChange(key, e.target.value)}
                                         placeholder={label}
-                                        className="bg-gray-700 text-white rounded-lg px-3 py-2 border border-gray-600 focus:outline-none focus:border-blue-500"
+                                        className="form-input"
                                     />
                                 </div>
                             );

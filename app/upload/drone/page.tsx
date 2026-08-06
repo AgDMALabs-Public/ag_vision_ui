@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function Home() {
     return (
         <main className="page-container">
-            <h1 className="title">AGV Upload</h1>
+            <h1 className="title">Drone Upload</h1>
             <div className="nav-button-container">
                 <Link href="/upload/drone/raw_data">
                     <button className="nav-button">

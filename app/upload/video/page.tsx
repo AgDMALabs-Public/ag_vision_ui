@@ -20,7 +20,7 @@ const VOLUME_FIELDS = [
 export default function MobileUpload() {
     return (
         <UploadForm
-            title="Mobile Upload"
+            title="Video Upload"
             volumeFields={VOLUME_FIELDS}
             pathTemplate={VIDEO_SCOUTING_TEMPLATE}
         />

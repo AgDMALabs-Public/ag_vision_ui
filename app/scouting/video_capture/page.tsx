@@ -5,8 +5,8 @@ import '@/packages/styles/styles.css';
 import MetadataField from "../../upload/components/MetadataField";
 import { useVolumeConfig } from "../../context/VolumeConfigContext";
 import { buildPathUpTo } from "../../lib/pathUtils";
-import WebcamCapture from "../components/WebcamCapture";
-import { WEBCAM_IMAGE_TEMPLATE } from "@/app/lib/constants";
+import WebcamVideo from "../components/WebcamVideo";
+import { WEBCAM_VIDEO_TEMPLATE } from "@/app/lib/constants";
 
 const VOLUME_FIELDS = [
     {key: "project", label: "Project"},
@@ -16,7 +16,7 @@ const VOLUME_FIELDS = [
     {key: "field", label: "Field"},
     {key: "location_name", label: "Location"},
     {key: "task", label: "Task"},
-    {key: "protocol", label: "Protocol", staticPathSegment: "images"},
+    {key: "protocol", label: "Protocol", staticPathSegment: "videos"},
     {key: "collectionDate", label: "Date of Collection", type: "date", skipInPathUpTo: true},
     {key: "plot_id", label: "Plot ID", recursiveSearch: true, recursiveSearchDepth: 1},
 ];
@@ -37,7 +37,7 @@ function resolvePath(
     );
 }
 
-export default function ImageCapturePage() {
+export default function VideoCapturePage() {
     const initialMetadata = Object.fromEntries(
         VOLUME_FIELDS.map((f) => [f.key, ""])
     );
@@ -64,49 +64,41 @@ export default function ImageCapturePage() {
         setStatus("idle");
     };
 
-    const handlePhotosCapture = async (files: File[]) => {
+    const handleVideoCapture = async (file: File) => {
         setIsSaving(true);
         setStatus("idle");
         setErrorMessage("");
 
         try {
-            // Use a dummy filename just to resolve the directory path based on the template
+            // Use a dummy filename to resolve the directory path
             const dummyResolvedPath = resolvePath(
-                WEBCAM_IMAGE_TEMPLATE.replace("{noteFileName}", "dummy.jpg"),
+                WEBCAM_VIDEO_TEMPLATE.replace("{noteFileName}", "dummy.webm"),
                 metadata,
                 config
             );
 
-            // Extract just the directory portion
+            // Extract directory portion
             const targetDir = dummyResolvedPath.substring(
                 0,
                 dummyResolvedPath.lastIndexOf("/")
             );
 
-            // Upload each captured photo
-            for (const file of files) {
-                const formData = new FormData();
-                formData.append("file", file);
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("filePath", `${targetDir}/${file.name}`);
 
-                // Save them in an "images" subfolder inside the plot's directory
-                formData.append(
-                    "filePath",
-                    `${targetDir}/${file.name}`
-                );
+            const res = await fetch("/api/upload/databricks", {
+                method: "POST",
+                body: formData,
+            });
 
-                const res = await fetch("/api/upload/databricks", {
-                    method: "POST",
-                    body: formData,
-                });
-
-                if (!res.ok) {
-                    const data = await res.json();
-                    throw new Error(data.error || `Failed to save ${file.name}`);
-                }
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error || `Failed to save ${file.name}`);
             }
 
             setStatus("success");
-            // Clear only the plot ID field so the user can easily select the next plot
+            // Clear plot ID so user can select next plot
             setMetadata((prev) => ({ ...prev, plot_id: "" }));
         } catch (err: any) {
             setStatus("error");
@@ -116,14 +108,13 @@ export default function ImageCapturePage() {
         }
     };
 
-    // Require all metadata fields to be filled before allowing camera uploads
     const allFieldsComplete = VOLUME_FIELDS.every(
         (f) => metadata[f.key]?.trim() !== ""
     );
 
     return (
         <main className="page-container">
-            <h1 className="title">Image Capture</h1>
+            <h1 className="title">Video Capture</h1>
             <div className="split-container">
                 <section className="card">
                     <h2 className="title-2">Select Field</h2>
@@ -173,9 +164,9 @@ export default function ImageCapturePage() {
                     </div>
                 </section>
 
-                {/* Right Column: Camera View */}
+                {/* Right Column: Video Capture */}
                 <section className="card">
-                    <h2 className="title-2">Capture Photos</h2>
+                    <h2 className="title-2">Record Video</h2>
 
                     {!allFieldsComplete && (
                         <div className="p-3 bg-yellow-900 border border-yellow-600 rounded-lg text-yellow-200 text-sm mb-4">
@@ -183,19 +174,18 @@ export default function ImageCapturePage() {
                         </div>
                     )}
 
-                    {/* Disable the camera UI entirely if fields are missing */}
                     <div className={!allFieldsComplete ? "opacity-50 pointer-events-none" : ""}>
-                        <WebcamCapture onPhotosCapture={handlePhotosCapture} />
+                        <WebcamVideo onVideoCapture={handleVideoCapture} />
                     </div>
 
                     {isSaving && (
                         <div className="mt-4 p-3 bg-blue-900 border border-blue-500 rounded-lg text-blue-200 text-sm flex items-center gap-2">
-                            ⏳ Uploading photos to Databricks...
+                            ⏳ Uploading video to Databricks...
                         </div>
                     )}
                     {status === "success" && (
                         <div className="mt-4 p-3 bg-green-900 border border-green-500 rounded-lg text-green-200 text-sm">
-                            ✅ Photos uploaded successfully!
+                            ✅ Video uploaded successfully!
                         </div>
                     )}
                     {status === "error" && (
@@ -204,7 +194,6 @@ export default function ImageCapturePage() {
                         </div>
                     )}
                 </section>
-
             </div>
         </main>
     );
