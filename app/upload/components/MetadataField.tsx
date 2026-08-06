@@ -78,7 +78,7 @@ export default function MetadataField({
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
                     disabled={disabled}
-                    className="bg-gray-700 text-white rounded-lg px-3 py-2 border border-gray-600 focus:outline-none focus:border-blue-500 disabled:opacity-40"
+                    className="form-input"
                 />
             </div>
         );
@@ -88,7 +88,7 @@ export default function MetadataField({
         <div className="flex flex-col gap-1">
             <label className="caption">{label}</label>
             {loading ? (
-                <div className="bg-gray-700 rounded-lg px-3 py-2 text-gray-400 text-sm animate-pulse">
+                <div className="loading-input">
                     Loading...
                 </div>
             ) : freeText ? (
@@ -99,7 +99,7 @@ export default function MetadataField({
                         onChange={handleFreeTextChange}
                         disabled={disabled}
                         placeholder={`Enter ${label}`}
-                        className="bg-gray-700 text-white rounded-lg px-3 py-2 border border-gray-600 focus:outline-none focus:border-blue-500 disabled:opacity-40"
+                        className="form-input"
                     />
                     <span className="text-gray-500 text-xs">Not found in volume — enter manually (spaces will be converted to underscores)</span>
                 </div>
@@ -116,7 +116,7 @@ export default function MetadataField({
                             }
                         }}
                         disabled={disabled}
-                        className="flex-1 bg-gray-700 text-white rounded-lg px-3 py-2 border border-gray-600 focus:outline-none focus:border-blue-500 disabled:opacity-40"
+                        className="form-input"
                     >
                         <option value="">Select {label}...</option>
                         {options.map((opt) => (

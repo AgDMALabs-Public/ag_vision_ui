@@ -381,10 +381,9 @@ export default function UploadForm({
     return (
         <main className="page-container">
             <h1 className="title">{title}</h1>
-
             <section className="card">
                 <h2 className="title-2">Select Field</h2>
-                <div className="grid-container">
+                <div className="cardGrid">
                     {volumeFields.map(({key, label, type, options}, index) => {
                         const volumePath = getPathUpTo(index);
                         const isDisabled = index > 0 && !metadata[volumeFields[index - 1].key];
@@ -399,7 +398,7 @@ export default function UploadForm({
                                             handleVolumeFieldChange(key, e.target.value)
                                         }
                                         disabled={isDisabled}
-                                        className="bg-gray-700 text-white rounded-lg px-3 py-2 border border-gray-600 focus:outline-none focus:border-blue-500 disabled:opacity-40"
+                                        className="form-input"
                                     >
                                         <option value="">Select {label}...</option>
                                         {options.map((opt) => (
@@ -471,7 +470,7 @@ export default function UploadForm({
                                         <select
                                             value={metadata[key]}
                                             onChange={(e) => handleExtraFieldChange(key, e.target.value)}
-                                            className="bg-gray-700 text-white rounded-lg px-3 py-2 border border-gray-600 focus:outline-none focus:border-blue-500"
+                                            className="form-input"
                                         >
                                             <option value="">Select {label}...</option>
                                             {options.map((opt) => (
@@ -494,7 +493,7 @@ export default function UploadForm({
                                         step={step}
                                         onChange={(e) => handleExtraFieldChange(key, e.target.value)}
                                         placeholder={label}
-                                        className="bg-gray-700 text-white rounded-lg px-3 py-2 border border-gray-600 focus:outline-none focus:border-blue-500"
+                                        className="form-input"
                                     />
                                     {(key === "verticalOverlap" || key === "horizontalOverlap") && (
                                         <span className="text-gray-500 text-xs">Enter as a percentage, e.g. 80</span>
@@ -570,21 +569,21 @@ export default function UploadForm({
                 <button
                     onClick={checkAllFiles}
                     disabled={!metadataComplete || uploads.length === 0 || isUploading}
-                    className="nav-button disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="nav-button"
                 >
                     Check Files
                 </button>
                 <button
                     onClick={handleUpload}
                     disabled={!canUpload}
-                    className="nav-button disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="nav-button"
                 >
                     {isUploading ? "Uploading..." : `Upload${pendingCount > 0 ? ` (${pendingCount})` : ""}`}
                 </button>
                 <button
                     onClick={handleClear}
                     disabled={!hasAnyData || isUploading}
-                    className="nav-button bg-gray-600 hover:bg-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="nav-button"
                 >
                     Clear
                 </button>
