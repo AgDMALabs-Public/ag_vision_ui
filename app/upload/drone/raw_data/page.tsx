@@ -5,7 +5,7 @@ import {
     CAMERA_MAKE,
     RAW_DRONE_TEMPLATE,
     DRONE_MAKE,
-    DRONE_MODELS
+    DRONE_MODELS, CAMERA_MODEL
 } from "@/app/lib/constants";
 
 
@@ -25,7 +25,7 @@ const EXTRA_FIELDS = [
     {key: "droneModel", label: "Drone Model", options: DRONE_MODELS},
     {key: "cameraType", label: "Camera Type", options: CAMERA_TYPES},
     {key: "cameraMake", label: "Camera Make", options: CAMERA_MAKE},
-    {key: "cameraModel", label: "Camera Model"},
+    {key: "cameraModel", label: "Camera Model", options: CAMERA_MODEL},
     {key: "flightHeight", label: "Flight Height (m)", type: "number", min: 0, step: 0.1},
     {key: "verticalOverlap", label: "Vertical Overlap (%)", type: "number", min: 0, max: 100, step: 1},
     {key: "horizontalOverlap", label: "Horizontal Overlap (%)", type: "number", min: 0, max: 100, step: 1},
@@ -43,7 +43,7 @@ export default function DroneUpload() {
         "task": "task",
         "site": "site",
         "field": "field",
-        "location": "location_name",
+        "loc": "location_name",
         "trial": "trial",
         "droneMake": "droneMake",
         "droneModel": "droneModel",
@@ -59,23 +59,23 @@ export default function DroneUpload() {
     const customMeta = {
         "id": flightId,
         "location": {
-            "site": "site",
-            "field": "field",
-            "location": "loc"
+            "site": null,
+            "field": null,
+            "location": null
         },
         "trialProperties": {
-            "name": "trial"
+            "name": null
         },
         "drone_acquisition_properties": {
-            "droneMake": "Quantum-Systems",
-            "droneModel": "Trinity F90+",
-            "cameraMake": "cameraMake",
-            "cameraModel": "cameraModel",
-            "reflectancePanels": "reflectancePanels",
-            "reflectancePanelType": "panelType",
-            "flightHeight": "flightHeight",
-            "horizontalOverlapPercentage": "horizontalOverlap",
-            "verticalOverlapPercentage": "verticalOverlap"
+            "droneMake": null,
+            "droneModel": null,
+            "cameraMake": null,
+            "cameraModel": null,
+            "reflectancePanels": null,
+            "reflectancePanelType": null,
+            "flightHeight": null,
+            "horizontalOverlapPercentage": null,
+            "verticalOverlapPercentage": null
         }
     };
 
