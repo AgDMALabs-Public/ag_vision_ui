@@ -16,7 +16,30 @@ export const PANEL_TYPES = [
     "Custom",
 ] as const;
 
+export const ROVER_MAKE = [
+    'newco',
+    'artemis'
+]
+
+export const ROVER_MODEL = [
+    'jetson',
+    'bruno'
+]
+
+export const ROVER_CAMERA_MAKE = [
+    'luxonis'
+]
+
+export const ROVER_CAMERA_MODEL = [
+    'Oak-1'
+]
+
 export const CAMERA_MAKE = [
+    "MicaSense",
+    "DJI"
+] as const;
+
+export const CAMERA_MODEL = [
     "MicaSense",
     "DJI"
 ] as const;
@@ -64,8 +87,13 @@ export const PLANTING_SEASON = ['summer', 'fall', 'winter', 'spring', 'short_rai
 
 export const PLOT_MAP_COLS = [
     "plot_id",
-    "row",
-    "column"
+    "x",
+    "y",
+    "field_x",
+    "field_y",
+    "ebs_plot_id",
+    "site",
+    'field'
 ] as const;
 
 
@@ -83,6 +111,8 @@ export const MOBILE_SCOUTING_TEMPLATE = "/Volumes/{catalog}/{schema}/{volume}/{p
 export const VIDEO_SCOUTING_TEMPLATE = "/Volumes/{catalog}/{schema}/{volume}/{project}/{site}/{trial}/{season}/{field}/{location_name}/{task}/videos/{protocol}/{collectionDate}/{plot_id}/{fileName}";
 
 export const RAW_ROVER_TEMPLATE = "/Volumes/{catalog}/{schema}/{volume}/{project}/{site}/{trial}/{season}/{field}/{location_name}/rover/{missionName}/{scanDate}/raw_data/{cameraType}/{fileName}";
+
+export const ROVER_DETAILS_TEMPLATE = "/Volumes/{catalog}/{schema}/{volume}/{project}/{site}/{trial}/{season}/{field}/{location_name}/rover/{missionName}/{scanDate}/raw_data/{cameraType}/scan_details.json";
 
 export const SCOUTING_NOTES_TEMPLATE = "/Volumes/{catalog}/{schema}/{volume}/{project}/{site}/{trial}/{season}/{field}/{location_name}/{task}/notes/{protocol}/{collectionDate}/{plot_id}/{noteFileName}";
 

@@ -1,35 +1,82 @@
 import UploadForm from "../components/UploadForm";
-import {RAW_ROVER_TEMPLATE} from "../../lib/constants"
+import {
+    ROVER_DETAILS_TEMPLATE, RAW_ROVER_TEMPLATE, ROVER_CAMERA_MAKE, ROVER_CAMERA_MODEL, ROVER_MAKE, ROVER_MODEL,
+    CAMERA_TYPES
+} from "../../lib/constants"
 
 const VOLUME_FIELDS = [
-  { key: "country",        label: "Country" },
-  { key: "site",           label: "Site" },
-  { key: "season",           label: "Season (YYYY:Country:Crop:PlantingTime) Format" },
-  { key: "trial",          label: "Trial" },
-  { key: "field",          label: "Field" },
-  { key: "location",       label: "Location" },
-  { key: "task",           label: "Task" },
-  { key: "protocol",       label: "Protocol" },
-  { key: "device",         label: "Device" },
-  { key: "collectionDate", label: "Date of Collection", type: "date" },
+    {key: "project", label: "Project"},
+    {key: "site", label: "Site"},
+    {key: "trial", label: "Trial"},
+    {key: "season", label: "Season (YYYY:Country:Crop:PlantingTime) Format"},
+    {key: "field", label: "Field"},
+    {key: "location_name", label: "Location"},
+    {key: "missionName", label: "Mission Name", staticPathSegment: "drone"},
+    {key: "scanDate", label: "Scan Date", type: "date"},
 ];
 
 const EXTRA_FIELDS = [
-  { key: "cameraMake",        label: "Camera Make" },
-  { key: "cameraModel",       label: "Camera Model" },
-  { key: "cameraHeight",      label: "Camera Height (m)",      type: "number", min: 0, step: 0.01 },
-  { key: "verticalOverlap",   label: "Vertical Overlap (%)",   type: "number", min: 0, max: 100, step: 1 },
-  { key: "horizontalOverlap", label: "Horizontal Overlap (%)", type: "number", min: 0, max: 100, step: 1 },
+    {key: "roverMake", label: "Rover Make", options: ROVER_MAKE},
+    {key: "roverModel", label: "Rover Model", options: ROVER_MODEL},
+    {key: "cameraType", label: "Camera Type", options: CAMERA_TYPES},
+    {key: "cameraMake", label: "Camera Make", options: ROVER_CAMERA_MAKE},
+    {key: "cameraModel", label: "Camera Model", options: ROVER_CAMERA_MODEL},
+    {key: "cameraHeight", label: "Camera Height (m)", type: "number", min: 0, step: 0.01},
+    {key: "verticalOverlap", label: "Vertical Overlap (%)", type: "number", min: 0, max: 100, step: 1},
+    {key: "horizontalOverlap", label: "Horizontal Overlap (%)", type: "number", min: 0, max: 100, step: 1},
 ];
 
 
 export default function RoverUpload() {
-  return (
-    <UploadForm
-      title="Rover Upload"
-      volumeFields={VOLUME_FIELDS}
-      extraFields={EXTRA_FIELDS}
-      pathTemplate={RAW_ROVER_TEMPLATE}
-    />
-  );
+    const scanId = crypto.randomUUID();
+
+    const metaMapping = {
+        "missionName": "missionName",
+        "task": "task",
+        "site": "site",
+        "field": "field",
+        "loc": "location_name",
+        "trial": "trial",
+        "roverMake": "roverMake",
+        "roverModel": "roverModel",
+        "cameraMake": "cameraMake",
+        "cameraModel": "cameraModel",
+        "cameraHeight": "cameraHeight",
+        "horizontalOverlap": "horizontalOverlap",
+        "verticalOverlap": "verticalOverlap"
+    };
+
+    const customMeta = {
+        "id": scanId,
+        "location": {
+            "site": null,
+            "field": null,
+            "location": null
+        },
+        "trialProperties": {
+            "name": null,
+        },
+        "rover_acquisition_properties": {
+            "date": null,
+            "rover_make": null,
+            "rover_model": null,
+            "camera_make": null,
+            "camera_model": null,
+            "cameraHeight": null,
+            "horizontalOverlapPercentage": null,
+            "verticalOverlapPercentage": null
+        }
+    };
+
+    return (
+        <UploadForm
+            title="Rover Upload"
+            volumeFields={VOLUME_FIELDS}
+            extraFields={EXTRA_FIELDS}
+            pathTemplate={RAW_ROVER_TEMPLATE}
+            metadataTemplate={ROVER_DETAILS_TEMPLATE}
+            metadataSchema={metaMapping}
+            customMetadata={customMeta}
+        />
+    );
 }

@@ -5,8 +5,8 @@ import {PLOT_MAP_COLS, PLOT_BOOK_TEMPLATE} from "@/app/lib/constants";
 const VOLUME_FIELDS = [
     {key: "project", label: "Project"},
     {key: "site", label: "Site"},
-    {key: "season", label: "Season (YYYY:Country:Crop:PlantingTime) Format"},
     {key: "trial", label: "Trial"},
+    {key: "season", label: "Season (YYYY:Country:Crop:PlantingTime) Format"},
     {key: "field", label: "Field"},
     {key: "location_name", label: "Location"},
     {key: "missionName", label: "Mission Name", staticPathSegment: "drone"},
