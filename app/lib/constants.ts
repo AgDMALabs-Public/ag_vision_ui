@@ -11,9 +11,7 @@ export const STITCHING_SOFTWARE = [
 ] as const;
 
 export const PANEL_TYPES = [
-    "MicaSense",
-    "Sequoia",
-    "Custom",
+    "MicaSense"
 ] as const;
 
 export const ROVER_MAKE = [
@@ -36,21 +34,31 @@ export const ROVER_CAMERA_MODEL = [
 
 export const CAMERA_MAKE = [
     "MicaSense",
-    "DJI"
+    "DJI",
+    "Unknown"
 ] as const;
 
 export const CAMERA_MODEL = [
-    "MicaSense",
-    "DJI"
+    "Olympus Zuiko",
+    "Zenmuse X5s (Optics 15mm), CMOS, 4/3”",
+    "AIRPHEN (8 mm) - MS",
+    "Micasense Rededge IR-400-1100",
+    "PIKA L (2.1 mm)",
+    "Unknown"
+
 ] as const;
 
 export const DRONE_MAKE = [
-    "DJI"
+    "DJI",
+    "Unknown"
 ] as const;
 
 export const DRONE_MODELS = [
     "DJI Mavic 4 Pro",
-    "DJI Mavic 3 Enterprise"
+    "DJI Mavic 3 Enterprise",
+    "DJI Matrice 210",
+    "DJI Matrics 600",
+    "Unknown"
 ] as const;
 
 export const YEARS = [

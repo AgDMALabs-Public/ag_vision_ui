@@ -114,6 +114,13 @@
     font-weight: 500;
 }
 
+.note {
+    color: #d1d5db;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 300;
+}
+
 .caption {
     color: #d1d5db;
     font-size: 0.875rem;
