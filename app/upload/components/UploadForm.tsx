@@ -23,19 +23,25 @@ export interface FileTypeConfig {
 }
 
 
-export interface FileValidation {
-    type: "csv";
-    requiredColumns: readonly string[];
-}
+export type FileValidation =
+    | {
+        type: "csv";
+        requiredColumns: readonly string[];
+    }
+    | {
+        type: "fileType";
+        fileTypeConfig: FileTypeConfig;
+    };
 
 interface UploadFormProps {
     title: string;
+    upload_note?: string;
     volumeFields: FieldDef[];
     extraFields?: FieldDef[];
     pathTemplate: string;
     fileValidation?: FileValidation;
     metadataTemplate?: string; // Path for the JSON, e.g., ".../{fileName}.json"
-    metadataSchema?: Record<string, string>; // Maps output JSON key -> metadata source key
+    metadataSchema?: Record<string, any>; // Maps output JSON key -> metadata source key
     customMetadata?: Record<string, any>; // Add this line
 }
 
@@ -97,24 +103,94 @@ export const FILE_TYPE_CONFIGS = {
     } as FileTypeConfig,
 } as const;
 
+function setNestedProperty(target: Record<string, any>, path: string, value: any) {
+    const keys = path.split(".");
+    let current = target;
+    for (let i = 0; i < keys.length - 1; i++) {
+        const key = keys[i];
+        if (!current[key] || typeof current[key] !== "object" || Array.isArray(current[key])) {
+            current[key] = {};
+        }
+        current = current[key];
+    }
+    current[keys[keys.length - 1]] = value;
+}
 
+function deepClone<T>(obj: T): T {
+    if (obj === null || typeof obj !== "object") return obj;
+    if (Array.isArray(obj)) return obj.map(deepClone) as any;
+    const copy: Record<string, any> = {};
+    for (const key of Object.keys(obj)) {
+        copy[key] = deepClone((obj as Record<string, any>)[key]);
+    }
+    return copy as T;
+}
+
+function populateMetadata(
+    schema: Record<string, any>,
+    metadata: Record<string, string>,
+    target: Record<string, any>
+) {
+    for (const [key, val] of Object.entries(schema)) {
+        if (typeof val === "string") {
+            if (key.includes(".")) {
+                setNestedProperty(target, key, metadata[val]);
+            } else {
+                target[key] = metadata[val];
+            }
+        } else if (val && typeof val === "object" && !Array.isArray(val)) {
+            if (!target[key] || typeof target[key] !== "object") {
+                target[key] = {};
+            }
+            populateMetadata(val, metadata, target[key]);
+        }
+    }
+}
+
+function buildJsonMetadata(
+    customMetadata: Record<string, any>,
+    metadataSchema: Record<string, any>,
+    metadata: Record<string, string>
+): Record<string, any> {
+    const result = deepClone(customMetadata);
+    populateMetadata(metadataSchema, metadata, result);
+    return result;
+}
+
+function getNestedValue(obj: Record<string, any>, path: string): any {
+    return path.split(".").reduce((acc, part) => (acc != null ? acc[part] : undefined), obj);
+}
 
 function resolvePath(
     template: string,
-    metadata: Record<string, string>,
+    metadata: Record<string, any>,
     fileName: string,
     config: { catalog: string; schema: string; volume: string }
 ): string {
-    return template.replace(
-        /\{(\w+)\}/g,
-        (_, key) => {
-            if (key === "fileName") return fileName;
-            if (key === "catalog") return config.catalog;
-            if (key === "schema") return config.schema;
-            if (key === "volume") return config.volume;
-            return metadata[key] ?? "";
-        }
-    );
+    const fileNameWithoutExt = fileName.replace(/\.[^/.]+$/, "");
+
+    const context: Record<string, any> = {
+        fileName,
+        fileNameWithoutExt,
+        noteFileName: fileName,
+        catalog: config.catalog,
+        schema: config.schema,
+        volume: config.volume,
+        ...metadata,
+    };
+
+    return template
+        .replace(/\{([\w.-]+)\}/g, (_, key) => {
+            if (key in context && context[key] !== undefined && context[key] !== null) {
+                return String(context[key]);
+            }
+            const nested = getNestedValue(metadata, key);
+            if (nested !== undefined && nested !== null) {
+                return String(nested);
+            }
+            return "";
+        })
+        .replace(/\/+/g, "/");
 }
 
 async function validateCsvFile(file: File, requiredColumns: readonly string[]): Promise<{
@@ -154,8 +230,10 @@ async function validateCsvFile(file: File, requiredColumns: readonly string[]): 
     });
 }
 
+
 export default function UploadForm({
                                        title,
+                                       upload_note="",
                                        volumeFields,
                                        extraFields = [],
                                        pathTemplate,
@@ -206,7 +284,7 @@ export default function UploadForm({
         return metadata[field.requiredWhen.key] === field.requiredWhen.value;
     };
 
-    const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files ?? []);
         const initialUploads = files.map((file) => ({file, progress: 0, status: "pending" as const}));
         setUploads(initialUploads);
@@ -229,6 +307,23 @@ export default function UploadForm({
                     }
                 }
             }
+        } else if (fileValidation?.type === "fileType" && fileValidation.fileTypeConfig) {
+            const {extensions, mimeTypes, label} = fileValidation.fileTypeConfig;
+            files.forEach((file, i) => {
+                const hasValidExtension = extensions.some((ext) =>
+                    file.name.toLowerCase().endsWith(ext.toLowerCase())
+                );
+                const hasValidMimeType = !file.type || mimeTypes.includes(file.type);
+                if (!hasValidExtension || !hasValidMimeType) {
+                    setUploads((prev) =>
+                        prev.map((u, idx) =>
+                            idx === i
+                                ? {...u, status: "invalid", validationError: `Only ${label} files are allowed`}
+                                : u
+                        )
+                    );
+                }
+            });
         }
     };
 
@@ -329,13 +424,8 @@ export default function UploadForm({
                 await uploadFile(i, file);
 
                 // 2. If metadata template is provided, upload the sidecar JSON
-                if (metadataTemplate && metadataSchema) {
-                    const jsonContent = {
-                        ...customMetadata, // Merged here
-                        ...Object.fromEntries(
-                            Object.entries(metadataSchema).map(([jsonKey, metaKey]) => [jsonKey, metadata[metaKey]])
-                        )
-                    };
+                if (metadataTemplate && (metadataSchema || Object.keys(customMetadata).length > 0)) {
+                    const jsonContent = buildJsonMetadata(customMetadata, metadataSchema ?? {}, metadata);
 
                     const jsonBlob = new Blob([JSON.stringify(jsonContent, null, 2)], {type: "application/json"});
                     const jsonFilePath = resolvePath(metadataTemplate, metadata, file.name, config);
@@ -344,14 +434,25 @@ export default function UploadForm({
                     formData.append("file", jsonBlob, `${file.name}.json`);
                     formData.append("filePath", jsonFilePath);
 
-                    // You can reuse your existing upload API endpoint or create a new one
-                    await fetch("/api/upload/databricks", {
+                    const res = await fetch("/api/upload/databricks", {
                         method: "POST",
                         body: formData
                     });
+
+                    if (!res.ok) {
+                        const err = await res.text();
+                        throw new Error(`Metadata upload failed: ${err}`);
+                    }
                 }
             } catch (e) {
                 console.error("Upload failed", e);
+                setUploads((prev) =>
+                    prev.map((u, idx) =>
+                        idx === i
+                            ? {...u, status: "error", error: (e as Error)?.message ?? "Upload failed"}
+                            : u
+                    )
+                );
             }
         }
         setIsUploading(false);
@@ -508,6 +609,7 @@ export default function UploadForm({
             {/* File selection */}
             <section className="card">
                 <h2 className="title-2">Select Files</h2>
+                <h3 className="note">{upload_note}</h3>
                 <input ref={fileInputRef} type="file" multiple onChange={handleFileSelect} className="hidden"/>
                 <button onClick={() => fileInputRef.current?.click()} className="nav-button">
                     Browse Files

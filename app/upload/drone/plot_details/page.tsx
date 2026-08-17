@@ -22,6 +22,7 @@ export default function DroneUpload() {
     return (
         <UploadForm
             title="Plot Details Upload"
+            upload_note="Required Columns: plot_id, x, y, field_x, field_y, ebs_plot_id, site, field"
             volumeFields={VOLUME_FIELDS}
             pathTemplate={PLOT_BOOK_TEMPLATE}
             fileValidation={CSV_VALIDATION}

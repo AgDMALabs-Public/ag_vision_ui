@@ -11,7 +11,7 @@ const VOLUME_FIELDS = [
     {key: "season", label: "Season (YYYY:Country:Crop:PlantingTime) Format"},
     {key: "field", label: "Field"},
     {key: "location_name", label: "Location"},
-    {key: "missionName", label: "Mission Name", staticPathSegment: "drone"},
+    {key: "missionName", label: "Mission Name", staticPathSegment: "rover"},
     {key: "scanDate", label: "Scan Date", type: "date"},
 ];
 
@@ -31,21 +31,21 @@ export default function RoverUpload() {
     const scanId = crypto.randomUUID();
 
     const metaMapping = {
-        "missionName": "missionName",
-        "task": "task",
-        "site": "site",
-        "field": "field",
-        "loc": "location_name",
-        "trial": "trial",
-        "roverMake": "roverMake",
-        "roverModel": "roverModel",
-        "cameraMake": "cameraMake",
-        "cameraModel": "cameraModel",
-        "cameraHeight": "cameraHeight",
-        "horizontalOverlap": "horizontalOverlap",
-        "verticalOverlap": "verticalOverlap"
+        "location.site": "site",
+        "location.field": "field",
+        "location.location": "location_name",
+        "trial_properties.name": "trial",
+        "rover_acquisition_properties.date": "scanDate",
+        "rover_acquisition_properties.rover_make": "rover_make",
+        "rover_acquisition_properties.rover_model": "roverModel",
+        "rover_acquisition_properties.camera_make": "cameraMake",
+        "rover_acquisition_properties.camera_model": "cameraModel",
+        "rover_acquisition_properties.camera_height_m": "cameraHeight",
+        "rover_acquisition_properties.horizontal_overlap_percentage": "horizontalOverlap",
+        "rover_acquisition_properties.vertical_overlap_percentage": "verticalOverlap"
     };
 
+    // Please follow schema laid out here: https://github.com/AgDMALabs-Public/AgDMALabs-open/blob/main/open_aglabs/rover/models.py
     const customMeta = {
         "id": scanId,
         "location": {
@@ -53,7 +53,7 @@ export default function RoverUpload() {
             "field": null,
             "location": null
         },
-        "trialProperties": {
+        "trial_properties": {
             "name": null,
         },
         "rover_acquisition_properties": {
@@ -62,9 +62,9 @@ export default function RoverUpload() {
             "rover_model": null,
             "camera_make": null,
             "camera_model": null,
-            "cameraHeight": null,
-            "horizontalOverlapPercentage": null,
-            "verticalOverlapPercentage": null
+            "camera_height_m": null,
+            "horizontal_overlap_percentage": null,
+            "vertical_overlap_percentage": null
         }
     };
 
