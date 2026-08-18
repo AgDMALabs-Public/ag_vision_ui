@@ -20,6 +20,16 @@ export default function Home() {
                         Plot Details
                     </button>
                 </Link>
+                <Link href="/upload/drone/ground_control" className="nav-button">
+                    <button className="nav-button">
+                        Ground Control Points
+                    </button>
+                </Link>
+                <Link href="/upload/drone/field_boundary" className="nav-button">
+                    <button className="nav-button">
+                        Study Boundary
+                    </button>
+                </Link>
             </div>
         </main>
     );

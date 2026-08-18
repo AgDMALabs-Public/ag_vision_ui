@@ -27,8 +27,6 @@ export default function MobileUpload() {
                 type: "fileType",
                 fileTypeConfig: FILE_TYPE_CONFIGS.images,
             }}
-
-
         />
     );
 }

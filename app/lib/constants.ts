@@ -104,6 +104,12 @@ export const PLOT_MAP_COLS = [
     'field'
 ] as const;
 
+export const GROUND_CONTROL_POINTS_COLS = [
+    "name",
+    "longitude",
+    "latitude"
+] as const;
+
 
 // Paths to save the data
 export const RAW_DRONE_TEMPLATE = "/Volumes/{catalog}/{schema}/{volume}/{project}/{site}/{trial}/{season}/{field}/{location_name}/drone/{missionName}/{flightDate}/raw_data/{cameraType}/{fileName}";
@@ -111,6 +117,10 @@ export const RAW_DRONE_TEMPLATE = "/Volumes/{catalog}/{schema}/{volume}/{project
 export const FLIGHT_DETAILS_TEMPLATE = "/Volumes/{catalog}/{schema}/{volume}/{project}/{site}/{trial}/{season}/{field}/{location_name}/drone/{missionName}/{flightDate}/flight_details.json";
 
 export const PLOT_BOOK_TEMPLATE = "/Volumes/{catalog}/{schema}/{volume}/{project}/{site}/{trial}/{season}/{field}/{location_name}/drone/{missionName}/field_data/plot_book.csv";
+
+export const GCP_TEMPLATE = "/Volumes/{catalog}/{schema}/{volume}/{project}/{site}/{trial}/{season}/{field}/{location_name}/drone/{missionName}/field_data/ground_control_points.csv";
+
+export const STUDY_BOUNDARY_TEMPLATE = "/Volumes/{catalog}/{schema}/{volume}/{project}/{site}/{trial}/{season}/{field}/{location_name}/drone/{missionName}/field_data/study_boundary/{fileName}";
 
 export const ORTHOMOSAIC_TEMPLATE = "/Volumes/{catalog}/{schema}/{volume}/{project}/{site}/{trial}/{season}/{field}/{location_name}/drone/{missionName}/{flightDate}/orthomosaic/{software}_{stichingDate}/{cameraType}/{fileName}";
 
