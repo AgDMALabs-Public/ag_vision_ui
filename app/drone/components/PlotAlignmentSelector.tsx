@@ -4,9 +4,10 @@ import { useState } from "react";
 import { useVolumeConfig } from "../../context/VolumeConfigContext";
 import MetadataField from "../../upload/components/MetadataField";
 import { BoundaryDrawer } from "./gridTool";
+import { PLOT_BOUNDARIES_TEMPLATE } from "@/app/lib/constants";
 
 const PATH_TEMPLATE =
-    "/Volumes/{catalog}/{schema}/{volume}/{project}/{site}/{trial}/{season}/{field}/{location}/drone/{missionName}/{flightDate}/orthomosaic/{orthoName}/{cameraType}/{fileName}";
+    "/Volumes/{catalog}/{schema}/{volume}/{project}/{site}/{trial}/{season}/{field}/{location_name}/drone/{missionName}/{flightDate}/orthomosaic/{orthoName}/{cameraType}/{fileName}";
 
 const FIELDS = [
     { key: "project"     , label: "Project"      , listFiles: false },
@@ -14,7 +15,7 @@ const FIELDS = [
     { key: "trial"       , label: "Trial"        , listFiles: false },
     { key: "season"      , label: "Season"       , listFiles: false },
     { key: "field"       , label: "Field"        , listFiles: false },
-    { key: "location"    , label: "Location"     , listFiles: false },
+    { key: "location_name"    , label: "Location"     , listFiles: false },
     { key: "missionName" , label: "Mission Name" , listFiles: false },
     { key: "flightDate"  , label: "Flight Date"  , listFiles: false },
     { key: "orthoName"   , label: "Ortho Name"   , listFiles: false },
@@ -35,11 +36,11 @@ function buildPathForField(
         3:  `${volumeRoot}/${m.project}/${m.site}/${m.trial}`,
         4:  `${volumeRoot}/${m.project}/${m.site}/${m.trial}/${m.season}`,
         5:  `${volumeRoot}/${m.project}/${m.site}/${m.trial}/${m.season}/${m.field}`,
-        6:  `${volumeRoot}/${m.project}/${m.site}/${m.trial}/${m.season}/${m.field}/${m.location}/drone`,
-        7:  `${volumeRoot}/${m.project}/${m.site}/${m.trial}/${m.season}/${m.field}/${m.location}/drone/${m.missionName}`,
-        8:  `${volumeRoot}/${m.project}/${m.site}/${m.trial}/${m.season}/${m.field}/${m.location}/drone/${m.missionName}/${m.flightDate}/orthomosaic`,
-        9:  `${volumeRoot}/${m.project}/${m.site}/${m.trial}/${m.season}/${m.field}/${m.location}/drone/${m.missionName}/${m.flightDate}/orthomosaic/${m.orthoName}`,
-        10: `${volumeRoot}/${m.project}/${m.site}/${m.trial}/${m.season}/${m.field}/${m.location}/drone/${m.missionName}/${m.flightDate}/orthomosaic/${m.orthoName}/${m.cameraType}`,
+        6:  `${volumeRoot}/${m.project}/${m.site}/${m.trial}/${m.season}/${m.field}/${m.location_name}/drone`,
+        7:  `${volumeRoot}/${m.project}/${m.site}/${m.trial}/${m.season}/${m.field}/${m.location_name}/drone/${m.missionName}`,
+        8:  `${volumeRoot}/${m.project}/${m.site}/${m.trial}/${m.season}/${m.field}/${m.location_name}/drone/${m.missionName}/${m.flightDate}/orthomosaic`,
+        9:  `${volumeRoot}/${m.project}/${m.site}/${m.trial}/${m.season}/${m.field}/${m.location_name}/drone/${m.missionName}/${m.flightDate}/orthomosaic/${m.orthoName}`,
+        10: `${volumeRoot}/${m.project}/${m.site}/${m.trial}/${m.season}/${m.field}/${m.location_name}/drone/${m.missionName}/${m.flightDate}/orthomosaic/${m.orthoName}/${m.cameraType}`,
     };
 
     const path = paths[index];
@@ -68,6 +69,15 @@ export default function PlotAlignmentSelector() {
 
     const resolvedPath = allSelected
         ? PATH_TEMPLATE.replace(/\{(\w+)\}/g, (_, key) => {
+            if (key === "catalog") return config.catalog;
+            if (key === "schema")  return config.schema;
+            if (key === "volume")  return config.volume;
+            return metadata[key] ?? "";
+        })
+        : null;
+
+    const plotPath = allSelected
+        ? PLOT_BOUNDARIES_TEMPLATE.replace(/\{(\w+)\}/g, (_, key) => {
             if (key === "catalog") return config.catalog;
             if (key === "schema")  return config.schema;
             if (key === "volume")  return config.volume;
@@ -125,15 +135,15 @@ export default function PlotAlignmentSelector() {
                 </button>
             )}
 
-            {showDrawer && resolvedPath && (
+            {showDrawer && resolvedPath && plotPath && (
                 <section className="w-full bg-gray-800 rounded-2xl p-6">
                     <h2 className="text-2xl font-semibold text-white mb-4">Draw Plot Boundaries</h2>
                     <BoundaryDrawer
                         orthoInfoUrl={`/api/drone/ortho-info?path=${encodeURIComponent(resolvedPath)}`}
-                        saveUrl={`/api/drone/plot-boundaries?path=${encodeURIComponent(resolvedPath)}`}
+                        saveUrl={`/api/drone/plot-boundaries?path=${encodeURIComponent(plotPath)}`}
                         onSaved={() => {
                             setShowDrawer(false);
-                            setSavedPath(resolvedPath);
+                            setSavedPath(plotPath);
                         }}
                         onCancel={() => setShowDrawer(false)}
                     />
