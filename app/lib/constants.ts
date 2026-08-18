@@ -107,12 +107,7 @@ export const PLOT_MAP_COLS = [
 export const GROUND_CONTROL_POINTS_COLS = [
     "name",
     "longitude",
-    "latitude",
-    "field_x",
-    "field_y",
-    "ebs_plot_id",
-    "site",
-    'field'
+    "latitude"
 ] as const;
 
 
