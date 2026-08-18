@@ -4,12 +4,10 @@ import { useState } from "react";
 import { useVolumeConfig } from "../../context/VolumeConfigContext";
 import MetadataField from "../../upload/components/MetadataField";
 import { FieldDrawer } from "./fieldTool";
+import { DRONE_BOUNDARY_TEMPLATE } from "@/app/lib/constants";
 
 const ORTHO_PATH_TEMPLATE =
-    "/Volumes/{catalog}/{schema}/{volume}/{project}/{site}/{trial}/{season}/{field}/{location}/drone/{missionName}/{flightDate}/orthomosaic/{orthoName}/{cameraType}/{fileName}";
-
-const LOCATION_BOUNDARY_TEMPLATE =
-    "/Volumes/{catalog}/{schema}/{volume}/{project}/{site}/{trial}/{season}/{field}/{location}/drone/{missionName}/field_data/location_boundary.geojson";
+    "/Volumes/{catalog}/{schema}/{volume}/{project}/{site}/{trial}/{season}/{field}/{location_name}/drone/{missionName}/{flightDate}/orthomosaic/{orthoName}/{cameraType}/{fileName}";
 
 
 const FIELDS = [
@@ -18,7 +16,7 @@ const FIELDS = [
     { key: "trial"       , label: "Trial"        , listFiles: false },
     { key: "season"      , label: "Season"       , listFiles: false },
     { key: "field"       , label: "Field"        , listFiles: false },
-    { key: "location"    , label: "Location"     , listFiles: false },
+    { key: "location_name"    , label: "Location"     , listFiles: false },
     { key: "missionName" , label: "Mission Name" , listFiles: false },
     { key: "flightDate"  , label: "Flight Date"  , listFiles: false },
     { key: "orthoName"   , label: "Ortho Name"   , listFiles: false },
@@ -39,11 +37,11 @@ function buildPathForField(
         3:  `${volumeRoot}/${m.project}/${m.site}/${m.trial}`,
         4:  `${volumeRoot}/${m.project}/${m.site}/${m.trial}/${m.season}`,
         5:  `${volumeRoot}/${m.project}/${m.site}/${m.trial}/${m.season}/${m.field}`,
-        6:  `${volumeRoot}/${m.project}/${m.site}/${m.trial}/${m.season}/${m.field}/${m.location}/drone`,
-        7:  `${volumeRoot}/${m.project}/${m.site}/${m.trial}/${m.season}/${m.field}/${m.location}/drone/${m.missionName}`,
-        8:  `${volumeRoot}/${m.project}/${m.site}/${m.trial}/${m.season}/${m.field}/${m.location}/drone/${m.missionName}/${m.flightDate}/orthomosaic`,
-        9:  `${volumeRoot}/${m.project}/${m.site}/${m.trial}/${m.season}/${m.field}/${m.location}/drone/${m.missionName}/${m.flightDate}/orthomosaic/${m.orthoName}`,
-        10: `${volumeRoot}/${m.project}/${m.site}/${m.trial}/${m.season}/${m.field}/${m.location}/drone/${m.missionName}/${m.flightDate}/orthomosaic/${m.orthoName}/${m.cameraType}`,
+        6:  `${volumeRoot}/${m.project}/${m.site}/${m.trial}/${m.season}/${m.field}/${m.location_name}/drone`,
+        7:  `${volumeRoot}/${m.project}/${m.site}/${m.trial}/${m.season}/${m.field}/${m.location_name}/drone/${m.missionName}`,
+        8:  `${volumeRoot}/${m.project}/${m.site}/${m.trial}/${m.season}/${m.field}/${m.location_name}/drone/${m.missionName}/${m.flightDate}/orthomosaic`,
+        9:  `${volumeRoot}/${m.project}/${m.site}/${m.trial}/${m.season}/${m.field}/${m.location_name}/drone/${m.missionName}/${m.flightDate}/orthomosaic/${m.orthoName}`,
+        10: `${volumeRoot}/${m.project}/${m.site}/${m.trial}/${m.season}/${m.field}/${m.location_name}/drone/${m.missionName}/${m.flightDate}/orthomosaic/${m.orthoName}/${m.cameraType}`,
     };
 
     const path = paths[index];
@@ -80,7 +78,7 @@ export default function FieldBoundaryGenerator() {
         : null;
 
     const fieldPath = allSelected
-        ? LOCATION_BOUNDARY_TEMPLATE.replace(/\{(\w+)\}/g, (_, key) => {
+        ? DRONE_BOUNDARY_TEMPLATE.replace(/\{(\w+)\}/g, (_, key) => {
             if (key === "catalog") return config.catalog;
             if (key === "schema")  return config.schema;
             if (key === "volume")  return config.volume;

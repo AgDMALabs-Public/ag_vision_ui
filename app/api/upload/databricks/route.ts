@@ -37,6 +37,5 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({error: errorBody}, {status: response.status});
     }
 
-
     return NextResponse.json({success: true, path: filePath});
 }
