@@ -25,13 +25,13 @@ export interface FileTypeConfig {
 
 export type FileValidation =
     | {
-        type: "csv";
-        requiredColumns: readonly string[];
-    }
+    type: "csv";
+    requiredColumns: readonly string[];
+}
     | {
-        type: "fileType";
-        fileTypeConfig: FileTypeConfig;
-    };
+    type: "fileType";
+    fileTypeConfig: FileTypeConfig;
+};
 
 interface UploadFormProps {
     title: string;
@@ -101,6 +101,12 @@ export const FILE_TYPE_CONFIGS = {
         mimeTypes: ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "text/plain", "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.ms-powerpoint", "application/vnd.openxmlformats-officedocument.presentationml.presentation"],
         label: "Documents"
     } as FileTypeConfig,
+     geospatial: {
+        extensions: [".kml", ".geojson"],
+        mimeTypes: ["application/vnd.google-earth.kml+xml", "application/geo+json"],
+        label: "GeoSpatial "
+    } as FileTypeConfig,
+
 } as const;
 
 function setNestedProperty(target: Record<string, any>, path: string, value: any) {
@@ -233,7 +239,7 @@ async function validateCsvFile(file: File, requiredColumns: readonly string[]): 
 
 export default function UploadForm({
                                        title,
-                                       upload_note="",
+                                       upload_note = "",
                                        volumeFields,
                                        extraFields = [],
                                        pathTemplate,
@@ -284,7 +290,7 @@ export default function UploadForm({
         return metadata[field.requiredWhen.key] === field.requiredWhen.value;
     };
 
-     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files ?? []);
         const initialUploads = files.map((file) => ({file, progress: 0, status: "pending" as const}));
         setUploads(initialUploads);
@@ -479,6 +485,16 @@ export default function UploadForm({
     const canUpload = hasChecked && pendingCount > 0 && !isUploading;
     const hasAnyData = Object.values(metadata).some((v) => v.trim() !== "") || uploads.length > 0;
 
+     const acceptString = (() => {
+            if (fileValidation?.type === "csv") return ".csv";
+            if (fileValidation?.type === "fileType" && fileValidation.fileTypeConfig) {
+                // Prioritize extensions for best browser UI filtering, then include mimeTypes as a secondary hint.
+                const {extensions, mimeTypes} = fileValidation.fileTypeConfig;
+                return `.${extensions.join(",")}, ${mimeTypes.join(", ")}`;
+            }
+            return undefined; // Allows all files if no validation is set
+        })();
+
     return (
         <main className="page-container">
             <h1 className="title">{title}</h1>
@@ -610,7 +626,14 @@ export default function UploadForm({
             <section className="card">
                 <h2 className="title-2">Select Files</h2>
                 <h3 className="note">{upload_note}</h3>
-                <input ref={fileInputRef} type="file" multiple onChange={handleFileSelect} className="hidden"/>
+                <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    accept={acceptString}
+                    onChange={handleFileSelect}
+                    className="hidden"
+                />
                 <button onClick={() => fileInputRef.current?.click()} className="nav-button">
                     Browse Files
                 </button>
