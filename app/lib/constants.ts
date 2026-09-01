@@ -39,6 +39,7 @@ export const CAMERA_MAKE = [
 ] as const;
 
 export const CAMERA_MODEL = [
+    "DJI Mavic 3 M",
     "Olympus Zuiko",
     "Zenmuse X5s (Optics 15mm), CMOS, 4/3”",
     "AIRPHEN (8 mm) - MS",
