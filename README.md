@@ -20,7 +20,7 @@ This Project is to ease the uploading of Imagery data and adding field and plot 
 
 ### Data Bricks Start Via CLI.
 * build with 'npm run build'
-* If the app does not exist on databricks you will neeed to create it.
+* If the app does not exist on databricks you will neeed to create it with: databricks apps create agv-ui --description "An data upload app".
 * Sync the code to databricks... 'databricks sync . /Workspace/Users/dan@agdmalabs.com/agv-ui'
 * deploy on datarbicks... 'databricks apps deploy agv-ui \                            
   --source-code-path /Workspace/Users/dan@agdmalabs.com/agv-ui \
