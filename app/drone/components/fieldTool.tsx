@@ -2,6 +2,7 @@
 
 // No top-level Leaflet import — loaded entirely dynamically to prevent SSR crash
 import { useEffect, useRef, useState } from "react";
+import "@/packages/styles/base.css";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -10,6 +11,7 @@ interface OrthoInfo {
     path: string | null;
     bounds: [[number, number], [number, number]] | null;
     existing_geojson: GeoJSON.FeatureCollection | null;
+    debug_error?: string; // Optional field for backend error details
 }
 
 export interface FieldDrawerProps {
@@ -40,16 +42,27 @@ export function FieldDrawer({ orthoInfoUrl, saveUrl, onSaved, onCancel }: FieldD
                 if (!r.ok) throw new Error(`HTTP ${r.status}`);
                 return r.json() as Promise<OrthoInfo>;
             })
-            .then(setOrthoInfo)
-            .catch(() => setErrorMessage("Failed to load orthomosaic info."))
+            .then((info) => {
+                setOrthoInfo(info);
+                if (!info.available) {
+                    const baseMessage = "No mosaic found. Complete the preceding processing steps first.";
+                    const detail = info.debug_error ? `(${info.debug_error})` : "";
+                    setErrorMessage(`${baseMessage} ${detail}`);
+                }
+            })
+            .catch((e) => {
+                setErrorMessage(`Failed to load orthomosaic info: ${(e as Error).message}`);
+            })
             .finally(() => setIsLoading(false));
     }, [orthoInfoUrl]);
 
     // ── Map & Geoman Initialization ─────────────────────────────────────────────
 
     useEffect(() => {
-        if (!orthoInfo?.available || !orthoInfo.bounds || !mapContainerRef.current) return;
-        if (mapRef.current) return;
+        // Don't run if the mosaic isn't available or the map is already initialized
+        if (!orthoInfo?.available || !orthoInfo.bounds || !mapContainerRef.current || mapRef.current) {
+            return;
+        }
 
         // Capture into local consts before the async boundary
         const orthoBounds = orthoInfo.bounds;
@@ -58,7 +71,7 @@ export function FieldDrawer({ orthoInfoUrl, saveUrl, onSaved, onCancel }: FieldD
 
         let cancelled = false;
 
-        // Load Leaflet, CSS and Geoman all dynamically — nothing browser-specific runs at module level
+        // Load Leaflet, CSS and Geoman all dynamically
         Promise.all([
             import("leaflet"),
             import("leaflet/dist/leaflet.css"),
@@ -113,8 +126,7 @@ export function FieldDrawer({ orthoInfoUrl, saveUrl, onSaved, onCancel }: FieldD
             }
 
             // Initialize Geoman Controls
-            const mapAny = map as any;
-            mapAny.pm.addControls({
+            map.pm.addControls({
                 position: "topleft",
                 drawPolygon: true,
                 drawRectangle: true,
@@ -182,27 +194,29 @@ export function FieldDrawer({ orthoInfoUrl, saveUrl, onSaved, onCancel }: FieldD
 
     if (isLoading) return <p className="text-gray-400">Loading map data...</p>;
 
-    return (
-        <div className="flex flex-col gap-4 w-full">
-            {errorMessage && <p className="text-red-500 text-sm">{errorMessage}</p>}
+    // If there's an error, don't render the map container
+    if (errorMessage) {
+        return <p className="text-red-500 text-sm">{errorMessage}</p>;
+    }
 
+    return (
+        <div>
             <div
                 ref={mapContainerRef}
-                className="w-full rounded-lg border border-gray-700"
-                style={{ height: "600px" }}
+                className="map-container"
             />
 
             <div className="flex justify-end gap-3">
                 <button
                     onClick={onCancel}
-                    className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600 transition"
+                    className="cancel-button"
                 >
                     Cancel
                 </button>
                 <button
                     onClick={handleSave}
                     disabled={isSaving}
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500 disabled:opacity-50 transition"
+                    className="save-button"
                 >
                     {isSaving ? "Saving..." : "Save Boundary"}
                 </button>

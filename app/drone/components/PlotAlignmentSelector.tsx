@@ -6,6 +6,8 @@ import MetadataField from "../../upload/components/MetadataField";
 import { BoundaryDrawer } from "./gridTool";
 import { PLOT_BOUNDARIES_TEMPLATE } from "@/app/lib/constants";
 
+import "@/packages/styles/base.css";
+
 const PATH_TEMPLATE =
     "/Volumes/{catalog}/{schema}/{volume}/{project}/{site}/{trial}/{season}/{field}/{location_name}/drone/{missionName}/{flightDate}/orthomosaic/{orthoName}/{cameraType}/{fileName}";
 
@@ -94,10 +96,10 @@ export default function PlotAlignmentSelector() {
     }
 
     return (
-        <div className="flex flex-col gap-6 w-full max-w-3xl">
-            <section className="w-full bg-gray-800 rounded-2xl p-8">
-                <h2 className="text-2xl font-semibold text-white mb-6">Select Drone Flight</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="form-container">
+            <section className="card">
+                <h2 className="title-2">Select Drone Flight</h2>
+                <div className="grid-container">
                     {FIELDS.map((field, index) => (
                         <MetadataField
                             key={field.key}
@@ -113,7 +115,7 @@ export default function PlotAlignmentSelector() {
             </section>
 
             {resolvedPath && (
-                <section className="w-full bg-gray-800 rounded-2xl p-6">
+                <section className="message-container">
                     <h2 className="text-lg font-semibold text-white mb-2">Resolved Path</h2>
                     <p className="text-green-400 text-sm font-mono break-all">{resolvedPath}</p>
                 </section>
@@ -136,7 +138,7 @@ export default function PlotAlignmentSelector() {
             )}
 
             {showDrawer && resolvedPath && plotPath && (
-                <section className="w-full bg-gray-800 rounded-2xl p-6">
+                <section className="map-content-box">
                     <h2 className="text-2xl font-semibold text-white mb-4">Draw Plot Boundaries</h2>
                     <BoundaryDrawer
                         orthoInfoUrl={`/api/drone/ortho-info?path=${encodeURIComponent(resolvedPath)}`}

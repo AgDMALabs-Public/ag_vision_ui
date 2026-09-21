@@ -1,12 +1,13 @@
 .page-container {
     display: flex;
     min-height: 100vh;
+    width: 100%;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 2rem;
     background-color: #030712;
-    padding: 3rem 1rem;
+    padding: 1rem 1rem;
 }
 
 .split-container {
@@ -24,12 +25,12 @@
 }
 
 .image-box {
-  width: 100%;
-  aspect-ratio: 16 / 9; /* Enforces widescreen aspect ratio */
-  background-color: #111827;
-  border-radius: 0.5rem;
-  overflow: hidden;
-  border: 1px solid #374151;
+    width: 100%;
+    aspect-ratio: 16 / 9; /* Enforces widescreen aspect ratio */
+    background-color: #111827;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    border: 1px solid #374151;
 }
 
 .gridContainer {
@@ -38,8 +39,24 @@
     gap: 1rem;
 }
 
+.message-container {
+   width: 100%;
+    max-width: 48rem;
+    background-color: #1f2937;
+    border-radius: 1rem;
+    padding: 2rem;
+}
+
 .card {
     width: 100%;
+    max-width: 48rem;
+    background-color: #1f2937;
+    border-radius: 1rem;
+    padding: 2rem;
+}
+
+.card-wide {
+    width: 200%;
     max-width: 48rem;
     background-color: #1f2937;
     border-radius: 1rem;
@@ -57,7 +74,6 @@
 .nav-button-container {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-
     flex-direction: row;
     gap: 1rem;
     width: 100%;
@@ -158,4 +174,72 @@
     50% {
         opacity: 0.5;
     }
+}
+
+.cancel-button {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    background-color: #374151;
+    color: #ffffff;
+    border-radius: 0.25rem;
+    transition-property: background-color;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+}
+
+.cancel-button:hover {
+    background-color: #4B5563;
+}
+
+.save-button {
+    padding: 1rem;
+    background-color: #2563eb;
+    color: #ffffff;
+    border-radius: 0.25rem;
+    transition-property: background-color;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+}
+
+.save-button:hover {
+    background-color: #3b82f6;
+}
+
+.save-button:disabled {
+    opacity: 0.5;
+}
+
+.content-box {
+    width: 100%;
+    background-color: #1f2937;
+    border-radius: 1rem;
+    padding: 1.5rem;
+}
+
+.map-content-box {
+    width: 90%;
+    height: 90%;
+    /* Increase this value to make the box wider */
+    max-width: 200rem; /* Was 72rem */
+    background-color: #1f2937;
+    border-radius: 1rem;
+    padding: 1.5rem;
+}
+
+.form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+}
+
+.map-container {
+    width: 100%;
+    height: 80vh;
+    border-radius: 0.5rem;
+    border: 1px solid #374151;
 }
