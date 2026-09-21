@@ -11,7 +11,8 @@ export const STITCHING_SOFTWARE = [
 ] as const;
 
 export const PANEL_TYPES = [
-    "MicaSense"
+    "MicaSense",
+    "Hiphen"
 ] as const;
 
 export const ROVER_MAKE = [
@@ -35,7 +36,8 @@ export const ROVER_CAMERA_MODEL = [
 export const CAMERA_MAKE = [
     "MicaSense",
     "DJI",
-    "Unknown"
+    "Unknown",
+    "Hiphen"
 ] as const;
 
 export const CAMERA_MODEL = [
