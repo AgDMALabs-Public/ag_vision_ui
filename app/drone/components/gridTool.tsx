@@ -437,7 +437,6 @@ export function BoundaryDrawer({ orthoInfoUrl, saveUrl, onSaved, onCancel }: Bou
     }, [isEditMode, isMoveMode, isRotateMode]);
 
     // ── Move mode (drag entire polygon) ───────────────────────────────────────────
-
     const toggleMoveMode = useCallback(() => {
         const drawnLayers = drawnLayersRef.current;
         if (!drawnLayers) return;
@@ -477,7 +476,6 @@ export function BoundaryDrawer({ orthoInfoUrl, saveUrl, onSaved, onCancel }: Bou
     }, [isMoveMode, isEditMode, isRotateMode]);
 
     // ── Rotate mode ───────────────────────────────────────────────────────────────
-
     const toggleRotateMode = useCallback(() => {
         const drawnLayers = drawnLayersRef.current;
         if (!drawnLayers) return;
@@ -863,11 +861,11 @@ export function BoundaryDrawer({ orthoInfoUrl, saveUrl, onSaved, onCancel }: Bou
     const activeMode = isEditMode ? "edit" : isMoveMode ? "move" : isRotateMode ? "rotate" : null;
 
     return (
-        <div className="flex flex-col gap-4 w-full">
+        <div>
             {errorMessage && <p className="text-red-400 text-sm">{errorMessage}</p>}
 
             {/* ── Grid Generator Panel ──────────────────────────────────────────────── */}
-            <div className="bg-gray-700 rounded-xl p-4 flex flex-col gap-3">
+            <div className="card">
                 <h3 className="text-white text-sm font-semibold">Grid Generator</h3>
 
                 <div className="flex flex-wrap items-end gap-3">
@@ -1016,7 +1014,9 @@ export function BoundaryDrawer({ orthoInfoUrl, saveUrl, onSaved, onCancel }: Bou
             </div>
 
             {/* ── Map ───────────────────────────────────────────────────────────────── */}
-            <div ref={mapContainerRef} className="w-full rounded-xl" style={{ height: 520 }} />
+            <div ref={mapContainerRef}
+                 className="map-container"
+            />
 
             {/* ── Footer actions ────────────────────────────────────────────────────── */}
             <div className="flex gap-3 justify-end">

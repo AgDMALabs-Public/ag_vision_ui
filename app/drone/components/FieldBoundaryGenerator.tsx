@@ -5,6 +5,7 @@ import { useVolumeConfig } from "../../context/VolumeConfigContext";
 import MetadataField from "../../upload/components/MetadataField";
 import { FieldDrawer } from "./fieldTool";
 import { DRONE_BOUNDARY_TEMPLATE } from "@/app/lib/constants";
+import "@/packages/styles/base.css";
 
 const ORTHO_PATH_TEMPLATE =
     "/Volumes/{catalog}/{schema}/{volume}/{project}/{site}/{trial}/{season}/{field}/{location_name}/drone/{missionName}/{flightDate}/orthomosaic/{orthoName}/{cameraType}/{fileName}";
@@ -95,7 +96,7 @@ export default function FieldBoundaryGenerator() {
     }
 
     return (
-        <div className="flex flex-col gap-6 w-full max-w-3xl">
+        <div className="form-container">
             <section className="card">
                 <h2 className="title-2">Select Drone Flight</h2>
                 <div className="grid-container">
@@ -114,7 +115,7 @@ export default function FieldBoundaryGenerator() {
             </section>
 
             {resolvedPath && (
-                <section className="w-full bg-gray-800 rounded-2xl p-6">
+                <section className="message-container">
                     <h2 className="text-lg font-semibold text-white mb-2">Resolved Path</h2>
                     <p className="text-green-400 text-sm font-mono break-all">{fieldPath}</p>
                 </section>
@@ -137,8 +138,8 @@ export default function FieldBoundaryGenerator() {
             )}
 
             {showDrawer && resolvedPath && fieldPath && (
-                <section className="w-full bg-gray-800 rounded-2xl p-6">
-                    <h2 className="text-2xl font-semibold text-white mb-4">Draw Plot Boundaries</h2>
+                <section className="map-content-box">
+                    <h2 className="text-2xl font-semibold text-white mb-4">Draw Field Boundary</h2>
                     <FieldDrawer
                         orthoInfoUrl={`/api/drone/ortho-info?path=${encodeURIComponent(resolvedPath)}`}
                         saveUrl={`/api/field/field_boundary?path=${encodeURIComponent(fieldPath)}`}
